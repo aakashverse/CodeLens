@@ -11,6 +11,12 @@ app.use(express.json());
 
 ConnectToDB();
 
+app.get("/health", (req, res) => {
+    return res.status(201).json({
+        message: "KYC is healthy :)"
+    })
+})
+
 app.listen(process.env.PORT || 5000, () => {
     console.log(`app is listening on port ${process.env.PORT}..`);
 });
