@@ -29,6 +29,18 @@ async function registerController(req, res) {
         password: hashedPassword,
         role
     });
+   
+    const token = jwt.sign(
+        {id: newUser._id, username: newUser.username},
+        process.env.JWT_SECRET,
+        {expiresIn: "1d"}
+    )
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 24*60*60*1000 // 1 day
+    });
 
     return res.status(201).json({
         message: "User Registered Successfully",
@@ -44,10 +56,10 @@ async function registerController(req, res) {
 async function loginController(req, res) {
     const {username, email, password} = req.body;
 
-    const user = userModel.findOne({email});
+    const user = await userModel.findOne({email});
 
     if(!user){
-        return res.status(400).json({
+        return res.status(404).json({
             message: "Invalid Email or Password",
         })
     }
@@ -59,14 +71,43 @@ async function loginController(req, res) {
         })
     }
 
+    const token = jwt.sign(
+        {id: user._id, username: user.username},
+        process.env.JWT_SECRET,
+        {expiresIn: "1d"}
+    )
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 24*60*60*1000 
+    });
+
     return res.status(200).json({
         message: "login successfull",
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
         }
     })
 }
 
-module.exports = {registerController, loginController}
+async function logoutController(req, res){
+    const token = req.headers.authorization;
+
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax"
+    });
+
+    return res.status(200).json({
+        message: "Logout successful"
+    })
+}
+
+module.exports = {
+    registerController, 
+    loginController, 
+    logoutController
+};
