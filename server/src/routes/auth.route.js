@@ -14,4 +14,7 @@ authRouter.post("/login", authController.loginController);
 // logout
 authRouter.get("/logout", authController.logoutController);
 
+// getme
+authRouter.get("/me", authMiddleware.authUser, authController.getMeController);
+
 module.exports = authRouter;

@@ -14,7 +14,7 @@ const Login = () => {
     e.preventDefault();
     console.log('Login submitted:', {email});
     await handleLogin({email, password});
-    navigate('/dashboard');
+    navigate('/');
   };
 
   if(loading){

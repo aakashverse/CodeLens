@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-async function authUser(req, res){
+async function authUser(req, res, next){
     const token = req.cookies.token;
 
     if(!token){
@@ -21,4 +21,4 @@ async function authUser(req, res){
     }
 }
 
-module.exports = authUser;
+module.exports = {authUser};
