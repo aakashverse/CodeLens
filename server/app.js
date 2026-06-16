@@ -3,7 +3,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const ConnectToDB = require("./src/config/db");
-const authRouter = require("./src/routes/auth.route");
+const authRouter  = require("./src/routes/auth.route");
+const ragRouter  = require("./src/routes/rag.route");
 
 dotenv.config();
 const app = express();
@@ -18,8 +19,9 @@ app.use(cors({
 ConnectToDB();
 
 app.use("/api/auth", authRouter);
+app.use("/api/repo", ragRouter);
 
-app.get("/health", (req, res) => {
+app.get("/health", (req, res) => {  
     return res.status(201).json({
         message: "KYC is healthy :)"
     })

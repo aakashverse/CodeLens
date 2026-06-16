@@ -1,0 +1,7 @@
+{
+  "watch": ["server"],
+  "ignore": [
+    "temp_repos/*",
+    "node_modules/*"
+  ]
+}
