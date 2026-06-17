@@ -4,6 +4,7 @@ const path = require('path');
 
 // ignore before sending to llm
 const IGNORED_DIRS = ['.git', 'node_modules', 'dist', 'build', '.next', 'public'];
+const IGNORED_FILES = ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'vite.config.js', 'eslint.config.js'];
 const IGNORED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.mp4', '.pdf', '.zip'];
 
 async function getFilteredFiles(dir) {
@@ -19,7 +20,7 @@ async function getFilteredFiles(dir) {
             }
         } else {
             const ext = path.extname(file.name).toLowerCase();
-            if (!IGNORED_EXTENSIONS.includes(ext)) {
+            if (!IGNORED_EXTENSIONS.includes(ext) && !IGNORED_FILES.includes(file.name)) {
                 results.push(fullPath);
             }
         }

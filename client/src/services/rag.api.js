@@ -19,6 +19,7 @@ import axios from "axios";
   }
 
   export async function sendChatMessage(question){
+    console.log(question);
     try{
       const response = await api.post('/api/repo/chat', {
         question
