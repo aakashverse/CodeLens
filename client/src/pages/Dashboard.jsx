@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router";
+import { useContext } from "react";
+import { AuthContext } from "../context/auth.context";
 import Navbar from "../components/Navbar";
 
-const Dashboard = ({ user }) => {
-  // Complete data for the tools available in CodeLens
+const Dashboard = () => {
+  const context = useContext(AuthContext);
+  const {user} = context;
+
   const navigate = useNavigate();
 
   const tools = [
     {
-      id: 'know-codebase',
+      id: 'chat-codebase',
       title: 'CodeLens AI Session',
       goTo: '/ai-session',
       description: 'Chat with your repository. Instantly trace data flows and understand complex logic using GenAI.',
@@ -59,19 +63,18 @@ const Dashboard = ({ user }) => {
   ];
 
   return (
-    // Outer layout: Flex container that fills the screen height and prevents full-page scrolling
     <div className="flex h-screen bg-[#0A0D14] overflow-hidden">
       
-      {/* 1. Reusable Left Sidebar Component */}
+      {/* left sidebar */}
       <Navbar/>
 
-      {/* 2. Main Content Area: Takes up remaining space and scrolls internally */}
+
       <main className="flex-1 overflow-y-auto text-gray-300 font-sans p-8 md:p-12 relative">
         
-        {/* Top Header */}
+      
         <header className="flex justify-between items-center mb-16 max-w-6xl mx-auto">
           {/* Page Title (Optional: You removed the logo since it's in the sidebar, which is cleaner) */}
-          <h2 className="text-xl font-semibold text-white tracking-wide">Overview</h2>
+          <h2 className="text-xl font-semibold text-white tracking-wide">Workspace</h2>
           
           <div className="flex items-center gap-4">
             <button className="p-2 text-gray-500 hover:text-white transition-colors" title="Notifications">
@@ -88,16 +91,16 @@ const Dashboard = ({ user }) => {
           </div>
         </header>
 
-        {/* Dashboard Content Container */}
+        
         <div className="max-w-6xl mx-auto">
           
-          {/* Welcome Section */}
+          
           <div className="mb-12">
             <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">Developer Command Center</h1>
             <p className="text-lg text-gray-500">Select a tool to analyze, visualize, or document your codebase.</p>
           </div>
 
-          {/* Tools Grid */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
             {tools.map((tool) => (
               <button 
@@ -105,7 +108,7 @@ const Dashboard = ({ user }) => {
                 onClick={() => navigate(tool.goTo)}
                 className={`group relative flex flex-col text-left bg-[#11151D] border border-gray-800/60 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 ${tool.borderHover}`}
               >
-                {/* Background Glow on Hover */}
+                
                 <div className={`absolute inset-0 bg-gradient-to-br ${tool.bgGradient} opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500 pointer-events-none`}></div>
                 
                 <div className="relative z-10 flex justify-between items-start mb-4">
@@ -148,7 +151,7 @@ const Dashboard = ({ user }) => {
             ))}
           </div>
 
-          {/* Recent Repositories Section */}
+         
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-200">Recent Workspaces</h2>
@@ -172,7 +175,7 @@ const Dashboard = ({ user }) => {
                 </button>
               </div>
               
-              {/* Connect New Action */}
+          
               <div className="flex items-center gap-3 p-4 hover:bg-gray-800/30 transition-colors cursor-pointer text-gray-400 hover:text-white group">
                 <div className="w-10 h-10 rounded-lg border border-dashed border-gray-700 flex items-center justify-center group-hover:border-gray-500 transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>

@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
-import { RagContext } from '../context/rag.context';
-import { useRagSession } from '../hooks/useRagSession';
+import { WorkspaceContext } from '../context/workspace.context';
+import { useWorkspace } from '../hooks/useWorkspace';
 import GithubConnectForm from '../components/GithubConnectForm';
 
 import ReactMarkdown from 'react-markdown';
@@ -9,9 +9,12 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const AiSession = () => {
-  const context = useContext(RagContext);
+  const context = useContext(WorkspaceContext);
+  const { repoUrl, sessionState, chatHistory = [], loadingText, resetSession } = context;
+  const { handleConnect, handleSendMessage, isAiTyping, error } = useWorkspace();
+  
   const [chatInput, setChatInput] = useState('');
-
+  
   if (!context) {
     return (
       <div className="p-6 text-red-400 font-mono text-sm">
@@ -20,8 +23,6 @@ const AiSession = () => {
     );
   }
   
-  const { repoUrl, sessionState, chatHistory = [], loadingText, resetSession } = context;
-  const { handleConnect, handleSendMessage, isAiTyping, error } = useRagSession();
 
   const onFormSubmit = (e) => {
     e.preventDefault();
@@ -51,7 +52,6 @@ const AiSession = () => {
           </div>
         )}
 
-        {/* View 1: Connect Repo View */}
         {(sessionState === 'input' || sessionState === 'cloning') && (
           <div className="absolute inset-0 flex items-center justify-center p-6 bg-[#0A0D14] z-20">
             <GithubConnectForm 
@@ -62,7 +62,6 @@ const AiSession = () => {
           </div>
         )}
 
-        {/* View 2: Split Workspace View */}
         {sessionState === 'workspace' && (
           <>
             

@@ -15,7 +15,7 @@ let activeVectorStore = null;
  * Endpoint: POST /api/repo/connect
  * Reads, chunks, embeds, and saves repository files for free.
  */
-const initializeRepoSession = async (req, res) => {
+async function initializeRepoSession(req, res){
     const { githubUrl } = req.body;
 
     if (!githubUrl) {
@@ -110,7 +110,7 @@ const initializeRepoSession = async (req, res) => {
  * Endpoint: POST /api/repo/chat
  * Performs similarity search and answers code questions for free.
  */
-const chatWithCodebase = async (req, res) => {
+async function chatWithCodebase(req, res){
     const { question } = req.body;
 
     if (!question) {

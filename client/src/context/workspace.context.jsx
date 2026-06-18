@@ -1,12 +1,13 @@
 import { createContext, useState } from 'react';
 
-export const RagContext = createContext(null);
+export const WorkspaceContext = createContext(null);
 
-export const RagProvider = ({ children }) => {
+export const WorkspaceProvider = ({ children }) => {
   const [repoUrl, setRepoUrl] = useState('');
-  const [sessionState, setSessionState] = useState('input'); // Default must be 'input'
+  const [sessionState, setSessionState] = useState('input'); 
   const [chatHistory, setChatHistory] = useState([]);
   const [loadingText, setLoadingText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // The helper function invoked by the useEffect cleanup hook
   const resetSession = () => {
@@ -14,17 +15,19 @@ export const RagProvider = ({ children }) => {
     setSessionState('input');
     setChatHistory([]);
     setLoadingText('');
+    setIsLoading(false);
   };
 
   return (
-    <RagContext.Provider value={{
+    <WorkspaceContext.Provider value={{
       repoUrl, setRepoUrl,
       sessionState, setSessionState,
       chatHistory, setChatHistory,
       loadingText, setLoadingText,
+      isLoading, setIsLoading,
       resetSession
     }}>
       {children}
-    </RagContext.Provider>
+    </WorkspaceContext.Provider>
   );
 };

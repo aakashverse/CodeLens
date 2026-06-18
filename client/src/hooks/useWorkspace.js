@@ -1,16 +1,17 @@
 import { useContext, useState } from 'react';
-import { RagContext } from '../context/rag.context.jsx';
-import { connectRepo, sendChatMessage} from '../services/rag.api';
+import { WorkspaceContext } from '../context/workspace.context.jsx';
+import { connectRepo, sendChatMessage} from '../services/workspace.api';
 
-export const useRagSession = () => {
-    const context = useContext(RagContext);
+export const useWorkspace = () => {
+    const context = useContext(WorkspaceContext);
     const {
-        repoUrl,
         setRepoUrl,
         setSessionState,
         setChatHistory,
         setLoadingText,
-        chatHistory
+        isLoading,
+        loadingText,
+        setIsLoading,
     } = context;
 
   const [isAiTyping, setIsAiTyping] = useState(false);
@@ -19,6 +20,7 @@ export const useRagSession = () => {
   // Connection Handler
   const handleConnect = async (url) => {
     setError(null);
+    setIsLoading(true);
     setRepoUrl(url);
     setSessionState('cloning');
     setLoadingText("Cloning and parsing repository. Building structural context map...");
@@ -36,6 +38,8 @@ export const useRagSession = () => {
     } catch (err) {
       setError(err.message);
       setSessionState('input');
+    } finally{
+      setIsLoading(false);
     }
   };
 
@@ -49,7 +53,7 @@ export const useRagSession = () => {
     // Optimistic UI updates
     setChatHistory(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsAiTyping(true);
-
+  
     try {
       const data = await sendChatMessage(userMessage);
       setChatHistory(prev => [...prev, { role: 'ai', content: data.answer }]);
@@ -63,6 +67,8 @@ export const useRagSession = () => {
   return {
     handleConnect,
     handleSendMessage,
+    isLoading,
+    loadingText,
     isAiTyping,
     error
   };

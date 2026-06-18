@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import { AuthProvider } from './context/auth.context';
-import { RagProvider } from "./context/rag.context";
+import { WorkspaceProvider } from "./context/workspace.context";
 import Dashboard from "./pages/Dashboard";
 import GithubConnectForm from "./components/GithubConnectForm";
 import AiSession from "./pages/AiSession";
@@ -11,7 +11,7 @@ import AiSession from "./pages/AiSession";
 const App = () => {
   return (
     <AuthProvider>
-      <RagProvider>
+      <WorkspaceProvider>
       <BrowserRouter>
     
         <Routes>
@@ -24,7 +24,7 @@ const App = () => {
         </Routes>
         
       </BrowserRouter>
-      </RagProvider>
+      </WorkspaceProvider>
     </AuthProvider>
   )
 }

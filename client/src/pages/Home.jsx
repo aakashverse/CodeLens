@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
-import Dashboard from './Dashboard';
 import Navbar from "../components/Navbar";
 
 const Home = () => {
@@ -14,16 +13,15 @@ const Home = () => {
 
     const handleLoginClick = () => {
         navigate('/login');
-  }
+    }
 
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
       
-      {/* left sidebarr */}
+      {/* left nvbar */}
       <Navbar/>
 
-      {/* Main content */}
       <main className="flex-1 relative flex flex-col items-center justify-center p-8 lg:p-24 z-10 bg-white">
         
         <div 
@@ -65,7 +63,7 @@ const Home = () => {
             </>
           ) : (
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/github-connect")}
               className="px-8 py-3.5 bg-gray-900 hover:bg-black text-white font-semibold text-sm rounded-lg shadow-xl shadow-gray-900/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
             >
               Go to Workspace

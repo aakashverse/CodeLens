@@ -1,4 +1,4 @@
-const dotenv = require("dotenv");
+require('dotenv').config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -6,7 +6,6 @@ const ConnectToDB = require("./src/config/db");
 const authRouter  = require("./src/routes/auth.route");
 const ragRouter  = require("./src/routes/rag.route");
 
-dotenv.config();
 const app = express();
 
 app.use(cookieParser());
