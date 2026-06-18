@@ -10,7 +10,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const AiSession = () => {
   const context = useContext(WorkspaceContext);
-  const { repoUrl, sessionState, chatHistory = [], loadingText, resetSession } = context;
+  const { repoUrl, sessionState, chatHistory = [], loadingText } = context;
   const { handleConnect, handleSendMessage, isAiTyping, error } = useWorkspace();
   
   const [chatInput, setChatInput] = useState('');
@@ -18,7 +18,7 @@ const AiSession = () => {
   if (!context) {
     return (
       <div className="p-6 text-red-400 font-mono text-sm">
-        [Error]: RagContext Provider missing. Wrap your routing architecture with RagProvider.
+        [Error]: workspace Provider missing. Wrap your routing architecture with workspace.
       </div>
     );
   }
@@ -36,7 +36,7 @@ const AiSession = () => {
     <div className="flex flex-col h-screen bg-[#0A0D14] font-sans">
       
       <header className="h-14 border-b border-gray-800 bg-[#11151D] flex items-center justify-between px-6 shrink-0">
-        <h1 className="font-semibold text-gray-200 text-sm">CodeLens AI Session</h1>
+        <h1 className="font-semibold text-gray-200 text-sm">CodeLens AI</h1>
         {repoUrl && (
           <div className="text-xs text-gray-500 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
             {repoUrl.split('/').pop().replace('.git', '')}

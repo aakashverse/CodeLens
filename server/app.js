@@ -4,7 +4,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const ConnectToDB = require("./src/config/db");
 const authRouter  = require("./src/routes/auth.route");
-const ragRouter  = require("./src/routes/rag.route");
+const workSpaceRouter  = require("./src/routes/workspace.route");
+const readmeRouter = require("./src/routes/readme.route");
 
 const app = express();
 
@@ -18,7 +19,8 @@ app.use(cors({
 ConnectToDB();
 
 app.use("/api/auth", authRouter);
-app.use("/api/repo", ragRouter);
+app.use("/api/repo", workSpaceRouter);
+app.use("/api/gen", readmeRouter);
 
 app.get("/health", (req, res) => {  
     return res.status(201).json({

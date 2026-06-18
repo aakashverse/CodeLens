@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useWorkspace } from '../hooks/useWorkspace';
+import { WorkspaceContext } from '../context/workspace.context';
 
 const GithubConnectForm = () => {
   const {isLoading, handleConnect, loadingText} = useWorkspace();
-  const [url, setUrl] = useState('');
-
+  const {repoUrl, setRepoUrl} = useContext(WorkspaceContext);
+  
   const navigate = useNavigate();
 
   const handleSubmit = async(e) => {
-    console.log("before submit: ", isLoading);
     e.preventDefault();
-    
-    if(url.trim()) {
-      await handleConnect(url);
-      navigate('/ai-session');
+ 
+    if(repoUrl.trim()) {
+      await handleConnect(repoUrl);
+      navigate('/dashboard');
     }
   };
-
-  console.log("after submit: ", isLoading);
 
   return (
     
@@ -46,8 +44,8 @@ const GithubConnectForm = () => {
               </div>
               <input 
                 type="url" 
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                value={repoUrl}
+                onChange={(e) => setRepoUrl(e.target.value)}
                 disabled={isLoading}
                 placeholder="https://github.com/username/repo" 
                 className="w-full bg-[#0A0D14] border border-gray-700 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all disabled:opacity-50"
@@ -57,7 +55,7 @@ const GithubConnectForm = () => {
 
             <button 
               type="submit" 
-              disabled={isLoading || !url}
+              disabled={isLoading || !repoUrl}
               className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
@@ -73,7 +71,7 @@ const GithubConnectForm = () => {
 
           {isLoading && (
             <div className="mt-6 bg-[#0A0D14] border border-gray-800 rounded-lg p-4 font-mono text-xs text-gray-400 h-24 overflow-hidden flex flex-col justify-end">
-              <p className="text-blue-400 mb-1">$ codelens fetch {url.split('/').slice(-2).join('/') || 'repo'}</p>
+              <p className="text-blue-400 mb-1">$ codelens fetch {repoUrl.split('/').slice(-2).join('/') || 'repo'}</p>
               <p className="animate-pulse text-gray-300">{loadingText}</p>
             </div>
           )}

@@ -1,6 +1,6 @@
 import { createContext, useState } from 'react';
 
-export const WorkspaceContext = createContext(null);
+export const WorkspaceContext = createContext();
 
 export const WorkspaceProvider = ({ children }) => {
   const [repoUrl, setRepoUrl] = useState('');

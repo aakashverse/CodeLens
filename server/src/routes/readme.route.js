@@ -1,7 +1,10 @@
 const {Router} = require("express");
+const readmeController = require("../controllers/readme.controller.js");
 
-const router = Router();
+const readmeRouter = Router();
 
-router.post('/readme', );
 
-module.exports = router;
+readmeRouter.get('/readme', readmeController.generateReadme);
+
+
+module.exports = readmeRouter;

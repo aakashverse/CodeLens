@@ -1,10 +1,15 @@
-import React from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
     const {user} = useAuth();
     const navigate = useNavigate();
+
+    const handleClick = () => {
+      if(!user){
+        navigate('/login');
+      }
+    }
 
   return (
     <aside className="w-64 h-screen bg-[#0E1117] text-gray-400 flex flex-col border-r border-gray-800 shadow-2xl z-20 shrink-0">
@@ -61,7 +66,7 @@ const Navbar = () => {
 
       {/* User Profile */}
       <div className="p-4 border-t border-gray-800/50">
-        <button className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-gray-800/50 transition-colors text-left group">
+        <button onClick={handleClick} className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-gray-800/50 transition-colors text-left group">
           <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0 group-hover:border-gray-500 transition-colors">
             {user ? user.username.charAt(0).toUpperCase() : '?'}
           </div>

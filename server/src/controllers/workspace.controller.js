@@ -166,7 +166,12 @@ async function chatWithCodebase(req, res){
     }
 };
 
+const getVectorStore = () => {
+    return activeVectorStore;
+};
+
 module.exports = {
     initializeRepoSession,
-    chatWithCodebase
+    chatWithCodebase,
+    getVectorStore
 };
