@@ -11,12 +11,15 @@ import AutoReadme from "./pages/AutoReadme";
 import {ReadmeProvider} from "./context/readme.context";
 import ViewArchitecture from "./pages/Architecture";
 import { ArchitectureProvider } from "./context/architecture.context";
+import Analyzer from "./pages/Analyzer";
+import { AnalyzerProvider } from "./context/analyzer.context";
 
 const App = () => {
   return (
     <AuthProvider>
       <WorkspaceProvider>
       <ArchitectureProvider>
+      <AnalyzerProvider>
       <ReadmeProvider>
       <BrowserRouter>
     
@@ -29,10 +32,13 @@ const App = () => {
           <Route path='/ai-session' element={<AiSession/>}/>
           <Route path='/gen-readme' element={<AutoReadme/>}/>
           <Route path='/view-architecture' element={<ViewArchitecture/>}/>
+          <Route path="/analyze-code" element={<Analyzer/>}/>
+          
         </Routes>
         
       </BrowserRouter>
       </ReadmeProvider>
+      </AnalyzerProvider>
       </ArchitectureProvider>
       </WorkspaceProvider>
     </AuthProvider>

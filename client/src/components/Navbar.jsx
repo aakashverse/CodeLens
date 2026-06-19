@@ -2,13 +2,18 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
-    const {user} = useAuth();
+    const {user, handleLogout} = useAuth();
     const navigate = useNavigate();
 
     const handleClick = () => {
       if(!user){
         navigate('/login');
       }
+    }
+
+    const handlelogout = async() => {
+      await handleLogout();
+      navigate("/");
     }
 
   return (
@@ -32,17 +37,17 @@ const Navbar = () => {
         <div>
           <p className="px-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Platform</p>
           <div className="space-y-1">
-            <button onClick={() => navigate('/github-connect')} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800/50 hover:text-gray-200 transition-colors text-sm font-medium text-left">
+            <button onClick={() => navigate('/dashboard')} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800/50 hover:text-gray-200 transition-colors text-sm font-medium text-left">
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
               Workspace
             </button>
-            <button onClick={() => navigate('/architecture')} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800/50 hover:text-gray-200 transition-colors text-sm font-medium text-left">
+            <button onClick={() => navigate('/view-architecture')} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800/50 hover:text-gray-200 transition-colors text-sm font-medium text-left">
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
               Architecture Viewer
             </button>
-            <button onClick={() => navigate('/ai-explainer')} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800/50 hover:text-gray-200 transition-colors text-sm font-medium text-left">
+            <button onClick={() => navigate('/ai-session')} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800/50 hover:text-gray-200 transition-colors text-sm font-medium text-left">
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              AI Explainer
+              AI Codebase RAG
             </button>
           </div>
         </div>
@@ -66,23 +71,41 @@ const Navbar = () => {
 
       {/* User Profile */}
       <div className="p-4 border-t border-gray-800/50">
-        <button onClick={handleClick} className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-gray-800/50 transition-colors text-left group">
-          <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0 group-hover:border-gray-500 transition-colors">
-            {user ? user.username.charAt(0).toUpperCase() : '?'}
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            {!user ? (
-              <span className="text-xs text-gray-500 truncate">Sign in to sync data</span>
-            ) : (
-              <>
-                <span className="text-sm font-medium text-gray-300 truncate">{user.username}</span>
-                <span className="text-xs text-gray-500 truncate">Pro Workspace</span>
-              </>
-            )}
-          </div>
-        </button>
+  {!user ? (
+    <button 
+      onClick={handleClick}
+      className="w-full flex items-center justify-center gap-2 p-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-sm font-medium transition-colors"
+    >
+      Sign in to sync data
+       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+    </button>
+  ) : (
+    <div className="w-full flex items-center justify-between p-2 rounded-md hover:bg-gray-800/30 transition-colors group">
+      
+      {/* Profile Info */}
+      <div className="flex items-center gap-3 overflow-hidden cursor-default">
+        <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0 group-hover:border-gray-500 transition-colors">
+          {user.username.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex flex-col overflow-hidden">
+          <span className="text-sm font-medium text-gray-300 truncate">{user.username}</span>
+          <span className="text-xs text-gray-500 truncate">Pro Workspace</span>
+        </div>
       </div>
-    </aside>
+      
+      {/* lgout btn */}
+      <button 
+        onClick={handlelogout} 
+        className="p-2 text-gray-500 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+        title="Log out"
+      >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+      </button>
+
+      </div>
+      )}
+    </div>
+  </aside>
   );
 };
 

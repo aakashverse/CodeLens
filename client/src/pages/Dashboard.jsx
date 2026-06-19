@@ -51,7 +51,7 @@ const Dashboard = () => {
     {
       id: 'smell-detector',
       title: 'Code Smell Detector',
-      goTo: '/ai-session',
+      goTo: '/analyze-code',
       description: 'Scan your files for anti-patterns, redundant queries, and performance bottlenecks before you deploy.',
       icon: (
         <svg className="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -68,10 +68,8 @@ const Dashboard = () => {
       {/* left sidebar */}
       <Navbar/>
 
-
       <main className="flex-1 overflow-y-auto text-gray-300 font-sans p-8 md:p-12 relative">
         
-      
         <header className="flex justify-between items-center mb-16 max-w-6xl mx-auto">
           {/* Page Title (Optional: You removed the logo since it's in the sidebar, which is cleaner) */}
           <h2 className="text-xl font-semibold text-white tracking-wide">Workspace</h2>
@@ -149,40 +147,6 @@ const Dashboard = () => {
                 </div>
               </button>
             ))}
-          </div>
-
-         
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-200">Recent Workspaces</h2>
-              <button className="text-sm font-medium text-blue-500 hover:text-blue-400 transition-colors">View All</button>
-            </div>
-            
-            <div className="bg-[#11151D] border border-gray-800/60 rounded-xl overflow-hidden">
-              {/* Repo Item */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-800/60 hover:bg-gray-800/30 transition-colors cursor-pointer group">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-blue-400 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-200 group-hover:text-blue-400 transition-colors">markme-attendance</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">Updated 2 hours ago • Local Directory</p>
-                  </div>
-                </div>
-                <button className="opacity-0 group-hover:opacity-100 px-3 py-1.5 text-xs font-semibold text-gray-300 bg-gray-800 rounded-md hover:bg-gray-700 transition-all">
-                  Open Workspace
-                </button>
-              </div>
-              
-          
-              <div className="flex items-center gap-3 p-4 hover:bg-gray-800/30 transition-colors cursor-pointer text-gray-400 hover:text-white group">
-                <div className="w-10 h-10 rounded-lg border border-dashed border-gray-700 flex items-center justify-center group-hover:border-gray-500 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                </div>
-                <span className="text-sm font-medium">Connect new repository</span>
-              </div>
-            </div>
           </div>
 
         </div>
