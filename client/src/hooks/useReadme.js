@@ -1,5 +1,4 @@
 import {useState, useContext} from "react";
-import {useNavigate} from "react-router";
 import { generateReadme } from "../services/readme.api";
 import {ReadmeContext} from "../context/readme.context";
 

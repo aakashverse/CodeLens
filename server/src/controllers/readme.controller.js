@@ -5,11 +5,11 @@ const { createStuffDocumentsChain } = require("langchain/chains/combine_document
 const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
-const {getVectorStore} = require("../controllers/workspace.controller"); // act as context for repo
+const {getVectorStore} = require("../services/vectorStore.service"); 
 
 // create readme function
 async function generateReadme(req, res) {
-    const vectorStore = getVectorStore();
+    const vectorStore = getVectorStore(); // act as context for repo
 
     if (!vectorStore) {
         return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });

@@ -9,11 +9,14 @@ import GithubConnectForm from "./components/GithubConnectForm";
 import AiSession from "./pages/AiSession";
 import AutoReadme from "./pages/AutoReadme";
 import {ReadmeProvider} from "./context/readme.context";
+import ViewArchitecture from "./pages/Architecture";
+import { ArchitectureProvider } from "./context/architecture.context";
 
 const App = () => {
   return (
     <AuthProvider>
       <WorkspaceProvider>
+      <ArchitectureProvider>
       <ReadmeProvider>
       <BrowserRouter>
     
@@ -25,10 +28,12 @@ const App = () => {
           <Route path='/github-connect' element={<GithubConnectForm/>}/>
           <Route path='/ai-session' element={<AiSession/>}/>
           <Route path='/gen-readme' element={<AutoReadme/>}/>
+          <Route path='/view-architecture' element={<ViewArchitecture/>}/>
         </Routes>
         
       </BrowserRouter>
       </ReadmeProvider>
+      </ArchitectureProvider>
       </WorkspaceProvider>
     </AuthProvider>
   )

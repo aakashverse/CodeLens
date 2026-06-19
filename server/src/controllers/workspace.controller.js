@@ -8,6 +8,7 @@ const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
 const { cloneAndExtract } = require('../utils/githubFetcher');
+const {setVectorStore}  = require("../services/vectorStore.service");
 
 let activeVectorStore = null;
 
@@ -82,6 +83,8 @@ async function initializeRepoSession(req, res){
               splitDocs,
               embeddings
             );
+            
+            setVectorStore(activeVectorStore);
             console.log(`[Free RAG] Successfully created vector store!`);
         } catch (err) {
             console.error("Embedding failed:", err);
@@ -166,12 +169,7 @@ async function chatWithCodebase(req, res){
     }
 };
 
-const getVectorStore = () => {
-    return activeVectorStore;
-};
-
 module.exports = {
     initializeRepoSession,
-    chatWithCodebase,
-    getVectorStore
+    chatWithCodebase
 };

@@ -6,6 +6,7 @@ const ConnectToDB = require("./src/config/db");
 const authRouter  = require("./src/routes/auth.route");
 const workSpaceRouter  = require("./src/routes/workspace.route");
 const readmeRouter = require("./src/routes/readme.route");
+const architectureRouter = require("./src/routes/architecture.route");
 
 const app = express();
 
@@ -21,6 +22,7 @@ ConnectToDB();
 app.use("/api/auth", authRouter);
 app.use("/api/repo", workSpaceRouter);
 app.use("/api/gen", readmeRouter);
+app.use("/api/visualize", architectureRouter);
 
 app.get("/health", (req, res) => {  
     return res.status(201).json({
