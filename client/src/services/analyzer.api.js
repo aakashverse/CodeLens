@@ -5,9 +5,11 @@ import axios from "axios";
         withCredentials: true
     });
 
-    export async function AnalyzeCode(){
+    export async function AnalyzeCode(githubUrl){
         try{
-            const response = await api.get("/api/analyze/code");
+            const response = await api.post("/api/analyze/code", {
+                githubUrl
+            });
             console.log("Code Analysis: ", response.data);
             
             return response.data;

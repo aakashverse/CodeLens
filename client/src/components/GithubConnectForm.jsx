@@ -1,22 +1,59 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router';
 import { useWorkspace } from '../hooks/useWorkspace';
 import { WorkspaceContext } from '../context/workspace.context';
+import {checkRepoStatus} from "../services/workspace.api";
 
 const GithubConnectForm = () => {
-  const {isLoading, handleConnect, loadingText} = useWorkspace();
+  const {isLoading, setIsLoading, handleConnect, loadingText} = useWorkspace();
   const {repoUrl, setRepoUrl} = useContext(WorkspaceContext);
   
   const navigate = useNavigate();
 
   const handleSubmit = async(e) => {
     e.preventDefault();
- 
+    setIsLoading(true);
+
+    try{
+      const { isIndexed, IndexedAt }  = await checkRepoStatus(repoUrl);
+      
+      console.log(isIndexed +" " + IndexedAt);
+
+      // if previously indexed, ask from user
+      if(isIndexed){
+        setIsLoading(false);
+
+        // format the datee
+        const dateStr = new Date(IndexedAt).toLocaleDateString(undefined, { 
+            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        })
+        
+        const wantsToReindex = window.confirm(
+            `This repository was already indexed on ${dateStr}.\n\nClick OK to re-index (fetch latest changes), or Cancel to use the existing data.`
+        );
+        
+        if(!wantsToReindex){
+          setRepoUrl(repoUrl); 
+          console.log("repoURL: ", repoUrl);
+          navigate('/dashboard'); 
+          return; 
+        }
+        
+        // If they clicked OK, turn loading back on and proceed below
+        setIsLoading(true); 
+      }
+      
     if(repoUrl.trim()) {
       await handleConnect(repoUrl);
       navigate('/dashboard');
     }
-  };
+  } catch(err){
+    console.error("Connection error: ", err);
+    alert(err.message);
+  } finally{
+    setIsLoading(false);
+  }
+}
 
   return (
     

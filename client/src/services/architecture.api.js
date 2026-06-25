@@ -5,9 +5,12 @@ import axios from "axios";
         withCredentials: true
     });
 
-    export async function generateArchitecture(){
+    export async function generateArchitecture(githubUrl){
         try{
-            const response = await api.get("/api/visualize/architecture");
+            const response = await api.post("/api/visualize/architecture", {
+                githubUrl
+            });
+            
             console.log("Gen Arch: ", response.data);
             return response.data;
         } catch(err){

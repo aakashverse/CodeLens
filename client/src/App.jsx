@@ -13,6 +13,8 @@ import ViewArchitecture from "./pages/Architecture";
 import { ArchitectureProvider } from "./context/architecture.context";
 import Analyzer from "./pages/Analyzer";
 import { AnalyzerProvider } from "./context/analyzer.context";
+import PRAnalyzer from "./pages/PrAnalyzer.jsx";
+import { PrAnalyzerProvider } from "./context/pr.context.jsx";
 
 const App = () => {
   return (
@@ -20,6 +22,7 @@ const App = () => {
       <WorkspaceProvider>
       <ArchitectureProvider>
       <AnalyzerProvider>
+      <PrAnalyzerProvider>
       <ReadmeProvider>
       <BrowserRouter>
     
@@ -30,14 +33,16 @@ const App = () => {
           <Route path='/dashboard' element={<Dashboard/>}/>
           <Route path='/github-connect' element={<GithubConnectForm/>}/>
           <Route path='/ai-session' element={<AiSession/>}/>
-          <Route path='/gen-readme' element={<AutoReadme/>}/>
-          <Route path='/view-architecture' element={<ViewArchitecture/>}/>
+          <Route path='/readme' element={<AutoReadme/>}/>
+          <Route path='/architecture' element={<ViewArchitecture/>}/>
           <Route path="/analyze-code" element={<Analyzer/>}/>
+          <Route path='/analyze-pr' element={<PRAnalyzer/>}/>
           
         </Routes>
         
       </BrowserRouter>
       </ReadmeProvider>
+      </PrAnalyzerProvider>
       </AnalyzerProvider>
       </ArchitectureProvider>
       </WorkspaceProvider>

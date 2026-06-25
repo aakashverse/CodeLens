@@ -131,7 +131,7 @@ const Analyzer = () => {
               <div className="md:col-span-3 bg-[#11151D] border border-gray-800 rounded-xl overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-gray-800 bg-[#161b22] flex justify-between items-center">
                   <h3 className="font-medium text-gray-200">Detected Anomalies</h3>
-                  <span className="text-xs text-gray-500 font-mono">{detectedResults.issues.length} total issues</span>
+                  <span className="text-xs text-gray-500 font-mono">{detectedResults?.issues?.length} total issues</span>
                 </div>
                 
                 <div className="divide-y divide-gray-800/50 max-h-[500px] overflow-y-auto">

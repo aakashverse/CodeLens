@@ -1,20 +1,22 @@
-const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
-const { MemoryVectorStore } = require("langchain/vectorstores/memory");
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
 const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
-const {getVectorStore} = require("../services/vectorStore.service"); 
+const { getVectorStore } = require("../utils/vectorStore"); 
 
-// create architecture function
+/**
+ * Endpoint: POST /api/repo/architecture
+ * Analyzes codebase context chunks to map system technology stack architecture.
+ */
 async function generateArchitecture(req, res) {
-    const vectorStore = getVectorStore();
-    console.log("Architecture controller loaded");
-
-    if (!vectorStore) {
-        return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
+    const { githubUrl } = req.body;
+    
+    if(!githubUrl){
+        return res.status(400).json({ error: "GitHub URL is required." });
     }
+
+    const repoName = githubUrl.split('/').pop().replace('.git', '');
 
     const prompt = PromptTemplate.fromTemplate(`
         You are CodeLens AI, an elite software architect. 
@@ -51,22 +53,42 @@ async function generateArchitecture(req, res) {
             }
         });
 
+        const embeddings = new GoogleGenerativeAIEmbeddings({
+            apiKey: process.env.GOOGLE_API_KEY,
+            model: "gemini-embedding-001", 
+        });
+
+        const vectorStore = await getVectorStore(embeddings);
+
+        if (!vectorStore) {
+            return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
+        }
+
         const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
-        const retrieval = await createRetrievalChain({
-            retriever: vectorStore.asRetriever(8), 
-            combineDocsChain
+        
+        const retriever = vectorStore.asRetriever({
+            k: 3, 
+            filter: {
+                preFilter: {
+                    "repoName": { $eq: repoName } 
+                }
+            }
         });
 
         const query = "Analyze the provided context and extract the technologies into the exact JSON schema requested. Keep it factual and concise.";
+        const retrievedDocs = await retriever.invoke(String(query));
 
-        const response = await retrieval.invoke({ input: query });
+        const response = await combineDocsChain.invoke({
+            input: String(query),
+            context: retrievedDocs
+        });
 
         let parsedAnswer;
         try {
-            parsedAnswer = JSON.parse(response.answer);
-            console.log("Architecture: ", parsedAnswer);
+            parsedAnswer = JSON.parse(response);
+            console.log("Architecture Extraction Complete: ", parsedAnswer);
         } catch(parseError) {
-            console.error("Failed to parse LLM response as JSON:", response.answer);
+            console.error("Failed to parse LLM response as JSON:", response);
             return res.status(500).json({ error: "Failed to generate a valid architecture format." });
         }
 
@@ -79,7 +101,6 @@ async function generateArchitecture(req, res) {
         return res.status(500).json({ error: "An internal server error occurred while analyzing the codebase." });
     }
 }
-
 
 module.exports = {
     generateArchitecture

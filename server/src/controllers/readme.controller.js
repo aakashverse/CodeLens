@@ -1,47 +1,24 @@
-const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
-const { MemoryVectorStore } = require("langchain/vectorstores/memory");
+const { MongoClient } = require("mongodb");
+const { MongoDBAtlasVectorSearch } = require("@langchain/mongodb");
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
-const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
-const {getVectorStore} = require("../services/vectorStore.service"); 
+const { getVectorStore } = require("../utils/vectorStore");
+
+// const client = new MongoClient(process.env.MONGO_URI);
+// const collectionName = "code_embeddings";
+// const dbName = "codelens";
 
 // create readme function
 async function generateReadme(req, res) {
-    const vectorStore = getVectorStore(); // act as context for repo
+    const { githubUrl } = req.body;
 
-    if (!vectorStore) {
-        return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
+    if (!githubUrl) {
+        return res.status(400).json({ error: "GitHub URL is required." });
     }
 
-    const prompt = PromptTemplate.fromTemplate(`
-        Generate a professional 'README.md' using the project context retrieved from the vector store.
-        
-        Strict Requirements:
-        * Use only information found in the retrieved context.
-        * Do not hallucinate missing details.
-        * Keep the README concise and developer-focused.
-        * Be as conscise as possible.
-            
-        Include:
-        * Project Overview
-        * Features
-        * Tech Stack
-        * Usage
-        * Project Structure
-        * Installation
-        
-        Codebase Context:
-        {context}
-
-        Developer's query:
-        {input}
-            
-        Return only the README in Markdown format.
- 
-        `
-    );
+    const repoName = githubUrl.split('/').pop().replace('.git', '');
 
     try {
         const model = new ChatGoogleGenerativeAI({
@@ -50,25 +27,68 @@ async function generateReadme(req, res) {
             temperature: 0.1,
         });
 
-        const combineDocsChain = await createStuffDocumentsChain({llm: model, prompt}); // document chain
-        const retrieval = await createRetrievalChain({  // retrieval chain
-            retriever: vectorStore.asRetriever(8),
-            combineDocsChain
+        const embeddings = new GoogleGenerativeAIEmbeddings({
+            apiKey: process.env.GOOGLE_API_KEY,
+            model: "gemini-embedding-001", 
+        });
+
+        // await client.connect();
+        // const collection = client.db(dbName).collection(collectionName);
+
+        const prompt = PromptTemplate.fromTemplate(`
+            Generate a professional 'README.md' using the project context retrieved from the vector store.
+            
+            Strict Requirements:
+            * Use only information found in the retrieved context.
+            * Do not hallucinate missing details.
+            * Keep the README concise and developer-focused.
+            * Be as concise as possible.
+                
+            Include:
+            * Project Overview
+            * Features
+            * Tech Stack
+            * Usage
+            * Project Structure
+            * Installation
+            
+            Codebase Context:
+            {context}
+
+            Developer's query:
+            {input}
+                
+            Return only the README in Markdown format.
+        `);
+
+        const combineDocsChain = await createStuffDocumentsChain({llm: model, prompt}); 
+        const vectorStore = await getVectorStore(embeddings);
+        
+        const retriever = vectorStore.asRetriever({
+            k: 3, 
+            filter: {
+                preFilter: {
+                    "repoName": { $eq: repoName } 
+                }
+            }
         });
 
         const query = "Generate a proper README.md file, strictly follow the prompt & use the given context only."
+        const retrievedDocs = await retriever.invoke(String(query));
 
-        const response = await retrieval.invoke({input: query});
-        // console.log("Readme resposne: ", response.data);
+        const response = await combineDocsChain.invoke({
+            input: String(query),
+            context: retrievedDocs
+        });
 
         return res.status(200).json({
-            answer: response.answer 
+            answer: response 
         })
 
     } catch (error) {
-        console.log("Readme Error: ", error);
+        console.error("Readme Generation Error: ", error);
+        return res.status(500).json({ error: "Failed to generate README." });
     }
-
 }
 
 module.exports = {

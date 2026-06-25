@@ -26,7 +26,7 @@ const Dashboard = () => {
     {
       id: 'auto-readme',
       title: 'Auto-README Generator',
-      goTo: '/gen-readme',
+      goTo: '/readme',
       description: 'Automatically scan your tech stack and generate comprehensive, beautifully formatted documentation.',
       icon: (
         <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -38,7 +38,7 @@ const Dashboard = () => {
     {
       id: 'architecture',
       title: 'Architecture Viewer',
-      goTo: '/view-architecture',
+      goTo: '/architecture',
       description: 'Visualize your entire codebase as an interactive node graph. See how components and routes connect.',
       icon: (
         <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
@@ -51,7 +51,7 @@ const Dashboard = () => {
     {
       id: 'smell-detector',
       title: 'Code Smell Detector',
-      goTo: '/analyze-code',
+      goTo: '/analyze',
       description: 'Scan your files for anti-patterns, redundant queries, and performance bottlenecks before you deploy.',
       icon: (
         <svg className="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -59,6 +59,21 @@ const Dashboard = () => {
       bgGradient: 'from-rose-500/10 to-orange-500/10',
       borderHover: 'hover:border-rose-500/50',
       tags: ['Performance', 'Security']
+    },
+    {
+      id: 'pr-lens',
+      title: 'PR Lens & Blast Radius',
+      goTo: '/analyze-pr',
+      description: 'Paste a Pull Request URL to decode complex diffs, auto-generate testing commands, and detect breaking changes before merging.',
+      icon: (
+        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7v10M8 7a2 2 0 100-4 2 2 0 000 4zm0 10a2 2 0 100 4 2 2 0 000-4zm8-10v.01M16 7a2 2 0 100-4 2 2 0 000 4zm0 0c0 3-2 5-5 5H8" />
+        </svg>
+      ),
+      bgGradient: 'from-emerald-500/10 to-teal-500/10',
+      borderHover: 'hover:border-emerald-500/50',
+      badge: '🔥 Hyped',
+      tags: ['GitHub API', 'GenAI']
     }
   ];
 

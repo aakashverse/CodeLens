@@ -1,10 +1,11 @@
 import {useContext} from "react";
 import {AnalyzeCode} from "../services/analyzer.api"
 import { AnalyzerContext } from "../context/analyzer.context";
+import {WorkspaceContext} from "../context/workspace.context";
 
 export const useAnalyzer = () => {
     const context = useContext(AnalyzerContext);
-
+    const { repoUrl } = useContext(WorkspaceContext);
     const {setIsDetecting, setDetectedResults, setLogs} = context;
 
     const handleAnalyzeCode = async() => {
@@ -13,7 +14,7 @@ export const useAnalyzer = () => {
         setLogs(['> Scanning codes...', '> Mapping dependency graphs...', '> Identifying issues...']);
     
         try{
-            const data = await AnalyzeCode();
+            const data = await AnalyzeCode(repoUrl);
             setLogs(prev => [...prev, '> AI Drafting Code Patterns...', '> Finalizing core issues...']);
 
             setDetectedResults(data.answer);

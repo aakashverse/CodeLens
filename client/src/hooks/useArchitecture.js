@@ -7,6 +7,7 @@ export const useArchitecture = () => {
     const context = useContext(ArchitectureContext);
 
     const {setIsAnalyzing, setArchitectureData, setLogs} = context;
+    const {repoUrl} = useContext(WorkspaceContext);
 
     const handleAnalyze = async() => {
         setIsAnalyzing(true);
@@ -14,11 +15,11 @@ export const useArchitecture = () => {
         setLogs(['> Scanning codes...', '> Mapping dependency graphs...', '> Identifying core architectural patterns...']);
     
         try{
-            const data = await generateArchitecture();
+            const data = await generateArchitecture(repoUrl);
             setLogs(prev => [...prev, '> AI Drafting architecture...', '> Finalizing system architecture...']);
 
             setArchitectureData(data.answer);
-            console.log(data.answer);
+            // console.log(data.answer);
         } catch(err){
             console.log(err);
             setArchitectureData('### Error\nFailed to generate Architecture. Make sure your repository is fully indexed.');

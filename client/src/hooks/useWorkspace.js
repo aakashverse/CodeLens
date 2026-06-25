@@ -5,6 +5,7 @@ import { connectRepo, sendChatMessage} from '../services/workspace.api';
 export const useWorkspace = () => {
     const context = useContext(WorkspaceContext);
     const {
+        repoUrl,
         setRepoUrl,
         setSessionState,
         setChatHistory,
@@ -55,7 +56,7 @@ export const useWorkspace = () => {
     setIsAiTyping(true);
   
     try {
-      const data = await sendChatMessage(userMessage);
+      const data = await sendChatMessage(userMessage, repoUrl);
       setChatHistory(prev => [...prev, { role: 'ai', content: data.answer }]);
     } catch (err) {
       setChatHistory(prev => [...prev, { role: 'ai', content: `Error encountered: ${err.message}` }]);
@@ -68,6 +69,7 @@ export const useWorkspace = () => {
     handleConnect,
     handleSendMessage,
     isLoading,
+    setIsLoading,
     loadingText,
     isAiTyping,
     error

@@ -6,9 +6,11 @@ import axios from "axios";
   });
 
 
-    export async function generateReadme(){
+    export async function generateReadme(githubUrl){
         try{
-            const response = await api.get('/api/gen/readme');
+            const response = await api.post('/api/gen/readme', {
+                githubUrl
+            });
 
             return response.data;
 

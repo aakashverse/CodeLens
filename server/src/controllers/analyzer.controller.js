@@ -5,15 +5,17 @@ const { createStuffDocumentsChain } = require("langchain/chains/combine_document
 const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
-const {getVectorStore} = require("../services/vectorStore.service"); 
+const {getVectorStore} = require("../utils/vectorStore"); 
 
 // analyzer function
 async function AnalyzeCode(req, res) {
-    const vectorStore = getVectorStore();
-
-    if (!vectorStore) {
-        return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
+    const { githubUrl } = req.body;
+    
+    if (!githubUrl) {
+        return res.status(400).json({ error: "GitHub URL is required." });
     }
+
+    const repoName = githubUrl.split('/').pop().replace('.git', '');
 
     const prompt = PromptTemplate.fromTemplate(`
         You are CodeLens AI, an elite static code analyzer and senior software architect. 
@@ -58,22 +60,42 @@ async function AnalyzeCode(req, res) {
             }
         });
 
-        const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
-        const retrieval = await createRetrievalChain({
-            retriever: vectorStore.asRetriever(8), 
-            combineDocsChain
+        const embeddings = new GoogleGenerativeAIEmbeddings({
+            apiKey: process.env.GOOGLE_API_KEY,
+            model: "gemini-embedding-001",
         });
 
-        const query = "Perform a deep scan of the codebase context. Look for redundant database queries, inefficient React state management, security vulnerabilities, and architectural anti-patterns. Return the exact JSON schema requested concisely.";
+        const vectorStore = await getVectorStore(embeddings);
 
-        const response = await retrieval.invoke({ input: query });
+        if (!vectorStore) {
+            return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
+        }
+
+        const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
+        const retriever = vectorStore.asRetriever({
+            k: 3, 
+            filter: {
+                preFilter: {
+                    repoName: { $eq: repoName }
+                }
+            }
+        })
+            
+    
+        const query = "Perform a deep scan of the codebase context. Look for redundant database queries, inefficient React state management, security vulnerabilities, and architectural anti-patterns. Return the exact JSON schema requested concisely.";
+        const retrievedDocs = await retriever.invoke(String(query));
+
+        const response = await combineDocsChain.invoke({
+            input: String(query),
+            context: retrievedDocs
+        });
 
         let parsedAnswer;
         try {
-            parsedAnswer = JSON.parse(response.answer);
+            parsedAnswer = JSON.parse(response);
             console.log("Architecture: ", parsedAnswer);
         } catch(parseError) {
-            console.error("Failed to parse LLM response as JSON:", response.answer);
+            console.error("Failed to parse LLM response as JSON:", response);
             return res.status(500).json({ error: "Failed to generate a valid architecture format." });
         }
 

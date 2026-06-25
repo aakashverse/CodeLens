@@ -4,10 +4,11 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const ConnectToDB = require("./src/config/db");
 const authRouter  = require("./src/routes/auth.route");
-const workSpaceRouter  = require("./src/routes/workspace.route");
+const repoRouter  = require("./src/routes/repo.route");
 const readmeRouter = require("./src/routes/readme.route");
 const architectureRouter = require("./src/routes/architecture.route");
 const analyzeRouter = require("./src/routes/analyzer.route");
+const prRouter = require("./src/routes/pr.route");
 
 const app = express();
 
@@ -21,10 +22,11 @@ app.use(cors({
 ConnectToDB();
 
 app.use("/api/auth", authRouter);
-app.use("/api/repo", workSpaceRouter);
+app.use("/api/repo", repoRouter);
 app.use("/api/gen", readmeRouter);
 app.use("/api/visualize", architectureRouter);
 app.use("/api/analyze", analyzeRouter);
+app.use("/api/pr", prRouter);
 
 app.get("/health", (req, res) => {  
     return res.status(201).json({
