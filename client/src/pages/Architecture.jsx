@@ -6,30 +6,22 @@ import { ArchitectureContext } from '../context/architecture.context';
 import { useArchitecture } from '../hooks/useArchitecture';
 import MermaidDiagram from '../components/MermaidDiagram';
 import { generateMermaidSyntax } from '../hooks/useArchitecture';
+import useToast from '../hooks/useToast';
 
 const ViewArchitecture = () => {
   const navigate = useNavigate();
-   const {resetSession} = useContext(WorkspaceContext);
+  const {showSuccess} = useToast();
+  const {resetSession} = useContext(WorkspaceContext);
   const { activeWorkspace } = useWorkspace();
-  const { repoUrl } = useContext(WorkspaceContext);
   const context = useContext(ArchitectureContext);
 
   const {isAnalyzing, architectureData, logs} = context;
 
   const {handleAnalyze} = useArchitecture();
 
-
-  // Redirect if no repo is connected
-  useEffect(() => {
-    if (!repoUrl) {
-      navigate('/github-connect');
-    }
-  }, [repoUrl, navigate]);
-
-//   if (!activeWorkspace) return null;
-
   const handleDisconnect = async() => {
     await resetSession();
+    showSuccess("Session Terminated.")
     navigate('/');
   }
 

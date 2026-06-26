@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router';
-import { useWorkspace } from '../hooks/useWorkspace';
 import { useReadme } from '../hooks/useReadme';
+import useToast from '../hooks/useToast';
 
 // Markdown Imports
 import ReactMarkdown from 'react-markdown';
@@ -13,34 +13,26 @@ import { WorkspaceContext } from '../context/workspace.context';
 
 const AutoReadme = () => {
   const navigate = useNavigate();
+  const {showSuccess} = useToast();
 
   const context = useContext(ReadmeContext);
   const {isGenerating, generatedMarkdown, logs} = context;
   const { repoUrl, resetSession } = useContext(WorkspaceContext);
   const {handleGenerate} = useReadme();
   
-  const [viewMode, setViewMode] = useState('preview'); // 'preview' or 'code'
-
-  // Security Check: Redirect if no repo is connected
-  useEffect(() => {
-    if (!repoUrl) {
-      navigate('/github-connect');
-    }
-  }, [repoUrl, navigate]);
-
-  if (!repoUrl) return null;
+  const [viewMode, setViewMode] = useState('preview'); 
 
   const handleDisconnect = async() => {
     await resetSession();
-    navigate("/");
+    showSuccess("Session Terminated.")
+    navigate('/');
   }
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedMarkdown);
-    alert('Markdown copied to clipboard!'); // You can replace this with a nice toast notification
+    showSuccess('copied to clipboard!');
   };
 
-//   if (!sessionState) return null; 
 
   return (
     <div className="flex flex-col h-screen bg-[#0A0D14] font-sans">
@@ -58,7 +50,7 @@ const AutoReadme = () => {
             {/* {sessionState} */}
           </div>
           <button 
-            onClick={() =>{handleDisconnect}}
+            onClick={handleDisconnect}
             className="text-xs text-gray-500 hover:text-red-400 transition-colors"
           >
             Disconnect
@@ -66,28 +58,23 @@ const AutoReadme = () => {
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* main Content araea */}
       <main className="flex-1 overflow-y-auto p-8 flex justify-center items-start">
         
-        {/* Terminal Window Wrapper */}
         <div className="w-full max-w-5xl bg-[#0E1117] border border-gray-700/60 rounded-xl shadow-2xl overflow-hidden flex flex-col mt-4">
           
-          {/* Terminal Header Bar */}
           <div className="h-12 bg-[#161B22] border-b border-gray-800 flex items-center justify-between px-4 shrink-0">
-            {/* macOS Window Dots */}
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500/80 border border-red-600"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-600"></div>
               <div className="w-3 h-3 rounded-full bg-green-500/80 border border-green-600"></div>
             </div>
 
-            {/* Title */}
             <div className="text-xs text-gray-400 font-mono flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               README.md - {repoUrl.split('/').slice(-2).join('/') || 'repo'}
             </div>
 
-            {/* View Toggles (Only show if markdown exists) */}
             <div className="flex items-center gap-2">
               {generatedMarkdown && !isGenerating && (
                 <>
@@ -120,7 +107,6 @@ const AutoReadme = () => {
           {/* Terminal Body */}
           <div className="min-h-[500px] p-6 text-sm flex flex-col">
             
-            {/* STATE 1: Empty / Ready to Generate */}
             {!isGenerating && !generatedMarkdown && (
               <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/20">
@@ -140,7 +126,7 @@ const AutoReadme = () => {
               </div>
             )}
 
-            {/* STATE 2: Generating (Terminal Logs) */}
+            {/*  Generating (Terminal Logs) */}
             {isGenerating && (
               <div className="font-mono text-gray-300 space-y-2">
                 {logs.map((log, i) => (
@@ -155,7 +141,7 @@ const AutoReadme = () => {
               </div>
             )}
 
-            {/* STATE 3: Generated Content */}
+            {/* Generated Content */}
             {!isGenerating && generatedMarkdown && (
               <div className="flex-1 w-full max-w-4xl mx-auto">
                 {viewMode === 'preview' ? (
@@ -198,7 +184,6 @@ const AutoReadme = () => {
             
           </div>
           
-          {/* Terminal Footer Actions */}
           {!isGenerating && generatedMarkdown && (
              <div className="p-4 border-t border-gray-800 bg-[#161B22] flex justify-end">
                <button 

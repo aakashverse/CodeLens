@@ -3,25 +3,26 @@ import { useNavigate } from 'react-router';
 import { useAnalyzer } from '../hooks/useAnalyzer';
 import { AnalyzerContext } from '../context/analyzer.context';
 import { WorkspaceContext } from '../context/workspace.context';
+import useToast from '../hooks/useToast';
 
 const Analyzer = () => {
   const navigate = useNavigate();
   const context = useContext(AnalyzerContext);
   
-  // Assuming scanResults is an object containing { healthScore, issues: [] } instead of a markdown string
   const { isDetecting, detectedResults, logs } = context; 
-  const { repoUrl, resetSession } = useContext(WorkspaceContext);
+  const {showSuccess} = useToast();
+  const { resetSession } = useContext(WorkspaceContext);
   const { handleAnalyzeCode } = useAnalyzer();
 
-  const [activeTab, setActiveTab] = useState('all'); // 'all', 'high', 'medium', 'low'
+  const [activeTab, setActiveTab] = useState('all'); 
 
-  useEffect(() => {
-    if (!repoUrl) navigate('/github-connect');
-  }, [repoUrl]);
+  const handleDisconnect = async() => {
+    await resetSession();
+    showSuccess("Session Terminated.")
+    navigate('/');
+  }
 
-  if (!repoUrl) return null;
-
-  // Helper to get color classes based on severity
+  // get color classes based on severity
   const getSeverityStyles = (severity) => {
     switch(severity) {
       case 'high': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
@@ -34,21 +35,28 @@ const Analyzer = () => {
   return (
     <div className="flex flex-col h-screen bg-[#0A0D14] font-sans">
       
-      {/* Header */}
       <header className="h-14 border-b border-gray-800 bg-[#11151D] flex items-center justify-between px-6 shrink-0">
         <h1 className="font-semibold text-gray-200 text-sm flex items-center gap-2">
           <svg className="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           Code Smell
         </h1>
-        <div className="text-xs text-gray-500 font-mono bg-gray-900/50 px-3 py-1 rounded border border-gray-800">
-          {repoUrl.split('/').slice(-2).join('/')}
+         <div className="flex items-center gap-4">
+          <div className="text-xs text-gray-400 bg-gray-900 px-3 py-1.5 rounded-md border border-gray-800 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+            {/* {sessionState} */}
+          </div>
+          <button 
+            onClick={handleDisconnect}
+            className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+          >
+            Disconnect
+          </button>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           
-          {/* Header Section */}
           <div className="flex items-center justify-between bg-[#11151D] border border-gray-800 rounded-xl p-6">
             <div>
               <h2 className="text-2xl font-bold text-white">Codebase Analysis</h2>
@@ -68,7 +76,6 @@ const Analyzer = () => {
             </button>
           </div>
 
-          {/* STATE 1: Empty / Waiting to Scan */}
           {!isDetecting && !detectedResults && (
             <div className="border border-dashed border-gray-800 rounded-xl p-16 flex flex-col items-center justify-center text-center bg-[#0d1117]/50">
               <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mb-4 border border-gray-800">
@@ -79,7 +86,6 @@ const Analyzer = () => {
             </div>
           )}
 
-          {/* STATE 2: Scanning Progress */}
           {isDetecting && (
             <div className="bg-[#11151D] border border-gray-800 rounded-xl p-8">
                <div className="flex items-center gap-4 mb-6">
@@ -100,20 +106,16 @@ const Analyzer = () => {
             </div>
           )}
 
-          {/* STATE 3: Results Dashboard */}
           {!isDetecting && detectedResults && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-fade-in-up">
               
-              {/* Left Column: Stats overview */}
               <div className="md:col-span-1 space-y-4">
-                {/* Health Score Card */}
                 <div className="bg-[#11151D] border border-gray-800 rounded-xl p-6 text-center relative overflow-hidden">
                   <div className={`absolute top-0 left-0 w-full h-1 ${detectedResults.healthScore > 80 ? 'bg-green-500' : 'bg-amber-500'}`}></div>
                   <div className="text-5xl font-bold text-white mb-2">{detectedResults.healthScore}</div>
                   <div className="text-sm text-gray-400 uppercase tracking-wider font-semibold">Health Score</div>
                 </div>
 
-                {/* Filter Navigation */}
                 <div className="bg-[#11151D] border border-gray-800 rounded-xl p-2 flex flex-col gap-1">
                   {['all', 'high', 'medium', 'low'].map((tab) => (
                     <button 
@@ -127,7 +129,6 @@ const Analyzer = () => {
                 </div>
               </div>
 
-              {/* Right Column: Issue List */}
               <div className="md:col-span-3 bg-[#11151D] border border-gray-800 rounded-xl overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-gray-800 bg-[#161b22] flex justify-between items-center">
                   <h3 className="font-medium text-gray-200">Detected Anomalies</h3>
@@ -156,7 +157,6 @@ const Analyzer = () => {
                     </div>
                   ))}
                   
-                  {/* Empty state for filters */}
                   {detectedResults.issues.filter(i => activeTab === 'all' || i.severity === activeTab).length === 0 && (
                     <div className="p-8 text-center text-gray-500 italic text-sm">
                       No issues found in this category. Great job!

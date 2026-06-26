@@ -6,12 +6,12 @@ const { getVectorStore } = require("../utils/vectorStore");
 async function analyzePR(req, res) {
     const { prUrl } = req.body;
 
-    if (!prUrl) {
+    if(!prUrl) {
         return res.status(400).json({ error: "Pull Request URL is required." });
     }
 
     const match = prUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
-    if (!match) {
+    if(!match) {
         return res.status(400).json({ error: "Invalid GitHub PR URL. Format: https://github.com/owner/repo/pull/123" });
     }
 

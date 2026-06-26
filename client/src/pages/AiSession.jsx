@@ -9,7 +9,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const AiSession = () => {
-  const context = useContext(WorkspaceContext);
+  const context = useContext(WorkspaceContext);  
   const { repoUrl, sessionState, chatHistory = [], loadingText } = context;
   const { handleConnect, handleSendMessage, isAiTyping, error } = useWorkspace();
   
@@ -22,11 +22,10 @@ const AiSession = () => {
       </div>
     );
   }
-  
 
   const onFormSubmit = (e) => {
     e.preventDefault();
-    if (chatInput.trim()) {
+    if(chatInput.trim()) {
       handleSendMessage(chatInput);
       setChatInput('');
     }
@@ -52,7 +51,7 @@ const AiSession = () => {
           </div>
         )}
 
-        {(sessionState === 'input' || sessionState === 'cloning') && (
+        {((sessionState === 'input' && !repoUrl) || sessionState === 'cloning') && (
           <div className="absolute inset-0 flex items-center justify-center p-6 bg-[#0A0D14] z-20">
             <GithubConnectForm 
               onSubmit={handleConnect} 
@@ -62,7 +61,7 @@ const AiSession = () => {
           </div>
         )}
 
-        {sessionState === 'workspace' && (
+        {(sessionState === 'workspace' || repoUrl) && (
           <>
             
             <main className="flex-1 flex flex-col min-w-0 bg-[#0E1117] border-r border-gray-800">
@@ -74,7 +73,6 @@ const AiSession = () => {
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mt-1 ${msg.role === 'user' ? 'bg-gradient-to-tr from-purple-500 to-blue-500 text-white' : 'bg-blue-600 text-white'}`}>
                       {msg.role === 'user' ? 'U' : 'AI'}
                     </div>
-
                     
                     <div className={`px-5 py-4 rounded-xl text-sm max-w-[85%] ${msg.role === 'user' ? 'bg-gray-800 border border-gray-700 text-gray-200 rounded-tr-sm' : 'text-gray-300 w-full'}`}>
                       

@@ -15,6 +15,9 @@ import Analyzer from "./pages/Analyzer";
 import { AnalyzerProvider } from "./context/analyzer.context";
 import PRAnalyzer from "./pages/PrAnalyzer.jsx";
 import { PrAnalyzerProvider } from "./context/pr.context.jsx";
+import Protected from "./components/Protected.jsx";
+import {ToastContainer} from "react-toastify"
+import { RequireRepo } from "./components/RequireRepo.jsx";
 
 const App = () => {
   return (
@@ -27,19 +30,22 @@ const App = () => {
       <BrowserRouter>
     
         <Routes>
+
           <Route path='/' element={<Home/>}/>
           <Route path='/signup' element={<Register/>}/>
           <Route path='/login' element={<Login/>}/>
-          <Route path='/dashboard' element={<Dashboard/>}/>
-          <Route path='/github-connect' element={<GithubConnectForm/>}/>
-          <Route path='/ai-session' element={<AiSession/>}/>
-          <Route path='/readme' element={<AutoReadme/>}/>
-          <Route path='/architecture' element={<ViewArchitecture/>}/>
-          <Route path="/analyze-code" element={<Analyzer/>}/>
-          <Route path='/analyze-pr' element={<PRAnalyzer/>}/>
+          <Route path='/dashboard' element={<Protected><Dashboard/></Protected>}/>
+          <Route path='/github-connect' element={<Protected><GithubConnectForm/></Protected>}/>
+          <Route path='/ai-session' element={<Protected><RequireRepo><AiSession/></RequireRepo></Protected>}/>
+          <Route path='/readme' element={<Protected><RequireRepo><AutoReadme/></RequireRepo></Protected>}/>
+          <Route path='/architecture' element={<Protected><RequireRepo><ViewArchitecture/></RequireRepo></Protected>}/>
+          <Route path="/analyze-code" element={<Protected><RequireRepo><Analyzer/></RequireRepo></Protected>}/>
+          <Route path='/analyze-pr' element={<Protected><RequireRepo><PRAnalyzer/></RequireRepo></Protected>}/>
+
           
         </Routes>
         
+        <ToastContainer position="top-right" />
       </BrowserRouter>
       </ReadmeProvider>
       </PrAnalyzerProvider>

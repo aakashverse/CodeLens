@@ -1,13 +1,14 @@
 const {Router} = require("express");
 const repoController = require("../controllers/repo.controller");
+const {authUser} = require("../middlewares/auth.middleware");
 
 const repoRouter = Router();
 
-repoRouter.post('/connect', repoController.initializeRepoSession);
+repoRouter.post('/connect', authUser, repoController.initializeRepoSession);
 
-repoRouter.post('/chat', repoController.chatWithCodebase);
+repoRouter.post('/chat', authUser, repoController.chatWithCodebase);
 
-repoRouter.get('/check-status', repoController.checkRepoStatus);
+repoRouter.get('/check-status', authUser, repoController.checkRepoStatus);
 
 
 

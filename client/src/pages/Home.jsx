@@ -31,7 +31,7 @@ const Home = () => {
 
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-        <div className="max-w-3xl text-center z-10 flex flex-col items-center">
+        <div className="max-w-3xl text-center mt-5 z-10 flex flex-col items-center">
 
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-[1.15] tracking-tight">
             Stop guessing.<br />
