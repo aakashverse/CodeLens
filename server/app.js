@@ -14,15 +14,18 @@ const prRouter = require("./src/routes/pr.route");
 const app = express();
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+console.log(allowedOrigins);
 
-app.use(cookieParser());
-app.use(express.json());
 app.use(cors({
     origin: allowedOrigins,
     credentials: true
 }));
 
 ConnectToDB();
+
+app.use(cookieParser());
+app.use(express.json());
+
 
 app.use("/api/auth", authRouter);
 app.use("/api/repo", AiSessionRouter);
