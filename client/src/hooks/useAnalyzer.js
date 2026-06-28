@@ -1,11 +1,11 @@
 import {useContext} from "react";
 import {AnalyzeCode} from "../services/analyzer.api"
 import { AnalyzerContext } from "../context/analyzer.context";
-import {WorkspaceContext} from "../context/workspace.context";
+import {AiSessionContext} from "../context/ai-session.context";
 
 export const useAnalyzer = () => {
     const context = useContext(AnalyzerContext);
-    const { repoUrl } = useContext(WorkspaceContext);
+    const { repoUrl } = useContext(AiSessionContext);
     const {setIsDetecting, setDetectedResults, setLogs} = context;
 
     const handleAnalyzeCode = async() => {

@@ -1,4 +1,3 @@
-
 import { useContext } from "react";
 import { AnalyzePR } from "../services/pr";
 import { PrAnalyzerContext } from "../context/pr.context";
@@ -18,11 +17,11 @@ export const usePr = () => {
         try {
           const data = await AnalyzePR(prUrl);
 
-            if(data.error) {
-                throw new Error(data.error);
-            }
+          if(data.error) {
+            throw new Error(data.error);
+          }
 
-          setAnalysis(data.prAnalysis);
+          setAnalysis(data.answer);
         } catch (err) {
           console.error(err);
           setError(err.message);
@@ -32,6 +31,6 @@ export const usePr = () => {
     }
 
     return {
-        handleAnalyze
+      handleAnalyze
     }
 }

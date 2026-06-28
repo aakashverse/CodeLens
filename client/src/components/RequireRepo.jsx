@@ -1,12 +1,13 @@
-import GithubConnectForm from "./GithubConnectForm";
+import { useNavigate } from "react-router";
 import { useContext } from "react";
-import { WorkspaceContext } from "../context/workspace.context";
+import { AiSessionContext } from "../context/ai-session.context";
 
 export const RequireRepo = ({ children }) => {
-  const { repoUrl } = useContext(WorkspaceContext);
+  const { repoUrl } = useContext(AiSessionContext);
+  const navigate = useNavigate();
 
   if (!repoUrl) {
-    return <GithubConnectForm />;
+    navigate("/github-connect")
   }
 
   return children;

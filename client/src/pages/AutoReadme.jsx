@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useContext } from 'react';
 import { useReadme } from '../hooks/useReadme';
 import useToast from '../hooks/useToast';
 
@@ -9,24 +8,17 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ReadmeContext } from '../context/readme.context';
-import { WorkspaceContext } from '../context/workspace.context';
+import { AiSessionContext } from '../context/ai-session.context';
 
 const AutoReadme = () => {
-  const navigate = useNavigate();
   const {showSuccess} = useToast();
 
   const context = useContext(ReadmeContext);
   const {isGenerating, generatedMarkdown, logs} = context;
-  const { repoUrl, resetSession } = useContext(WorkspaceContext);
+  const { repoUrl } = useContext(AiSessionContext);
   const {handleGenerate} = useReadme();
   
   const [viewMode, setViewMode] = useState('preview'); 
-
-  const handleDisconnect = async() => {
-    await resetSession();
-    showSuccess("Session Terminated.")
-    navigate('/');
-  }
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedMarkdown);
@@ -37,7 +29,6 @@ const AutoReadme = () => {
   return (
     <div className="flex flex-col h-screen bg-[#0A0D14] font-sans">
       
-      {/* Dynamic Header (Same as AiSession for consistency) */}
       <header className="h-14 border-b border-gray-800 bg-[#11151D] flex items-center justify-between px-6 shrink-0">
         <h1 className="font-semibold text-gray-200 text-sm flex items-center gap-2">
           <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -47,18 +38,10 @@ const AutoReadme = () => {
         <div className="flex items-center gap-4">
           <div className="text-xs text-gray-400 bg-gray-900 px-3 py-1.5 rounded-md border border-gray-800 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500"></span>
-            {/* {sessionState} */}
           </div>
-          <button 
-            onClick={handleDisconnect}
-            className="text-xs text-gray-500 hover:text-red-400 transition-colors"
-          >
-            Disconnect
-          </button>
         </div>
       </header>
 
-      {/* main Content araea */}
       <main className="flex-1 overflow-y-auto p-8 flex justify-center items-start">
         
         <div className="w-full max-w-5xl bg-[#0E1117] border border-gray-700/60 rounded-xl shadow-2xl overflow-hidden flex flex-col mt-4">
@@ -104,7 +87,7 @@ const AutoReadme = () => {
             </div>
           </div>
 
-          {/* Terminal Body */}
+          {/* Terminal body */}
           <div className="min-h-[500px] p-6 text-sm flex flex-col">
             
             {!isGenerating && !generatedMarkdown && (
@@ -126,7 +109,6 @@ const AutoReadme = () => {
               </div>
             )}
 
-            {/*  Generating (Terminal Logs) */}
             {isGenerating && (
               <div className="font-mono text-gray-300 space-y-2">
                 {logs.map((log, i) => (
@@ -141,7 +123,6 @@ const AutoReadme = () => {
               </div>
             )}
 
-            {/* Generated Content */}
             {!isGenerating && generatedMarkdown && (
               <div className="flex-1 w-full max-w-4xl mx-auto">
                 {viewMode === 'preview' ? (

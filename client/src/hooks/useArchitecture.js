@@ -1,13 +1,13 @@
 import {useContext} from "react";
 import { generateArchitecture } from "../services/architecture.api";
 import { ArchitectureContext } from "../context/architecture.context";
-import { WorkspaceContext } from "../context/workspace.context";
+import { AiSessionContext } from "../context/ai-session.context";
 
 export const useArchitecture = () => {
     const context = useContext(ArchitectureContext);
 
     const {setIsAnalyzing, setArchitectureData, setLogs} = context;
-    const {repoUrl} = useContext(WorkspaceContext);
+    const {repoUrl} = useContext(AiSessionContext);
 
     const handleAnalyze = async() => {
         setIsAnalyzing(true);

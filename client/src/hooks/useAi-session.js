@@ -1,9 +1,9 @@
 import { useContext, useState } from 'react';
-import { WorkspaceContext } from '../context/workspace.context.jsx';
-import { connectRepo, sendChatMessage} from '../services/workspace.api';
+import { AiSessionContext } from '../context/ai-session.context.jsx';
+import { connectRepo, sendChatMessage} from '../services/ai-session.api.js';
 
-export const useWorkspace = () => {
-    const context = useContext(WorkspaceContext);
+export const useAiSession = () => {
+    const context = useContext(AiSessionContext);
     const {
         repoUrl,
         setRepoUrl,
@@ -32,7 +32,7 @@ export const useWorkspace = () => {
       setChatHistory([
         { 
           role: 'ai', 
-          content: `Repository successfully indexed! Analyzed. Ask away about the codebase components.` 
+          content: `Repository successfully indexed` 
         }
       ]);
       setSessionState('workspace');
@@ -58,6 +58,7 @@ export const useWorkspace = () => {
     try {
       const data = await sendChatMessage(userMessage, repoUrl);
       setChatHistory(prev => [...prev, { role: 'ai', content: data.answer }]);
+
     } catch (err) {
       setChatHistory(prev => [...prev, { role: 'ai', content: `Error encountered: ${err.message}` }]);
     } finally {

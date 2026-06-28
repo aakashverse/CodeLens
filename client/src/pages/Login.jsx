@@ -15,7 +15,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Wrap in a try/catch so error toasts actually fire if login fails
+     
       await handleLogin({ email, password });
       showSuccess("Login Successful");
       navigate('/');
@@ -33,10 +33,9 @@ const Login = () => {
   }
 
   return (
-    // Outer Wrapper: Centers the card vertically and horizontally, adds safe padding on mobile
+  
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gray-50/50">
       
-      {/* Inner Card: Responsive padding, subtle shadow, and max-width restriction */}
       <div className="w-full max-w-md bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100">
         
         <div className="text-center mb-8 sm:mb-10 mt-2 sm:mt-0">
@@ -48,12 +47,7 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="relative mb-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
-          </div>
-        </div>
-
+        {/* login form */}
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="email">
@@ -103,7 +97,7 @@ const Login = () => {
 
         <p className="mt-8 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          {/* Note: I fixed the <Link> tag nesting here to be more idiomatic React Router */}
+
           <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
             Sign Up
           </Link>

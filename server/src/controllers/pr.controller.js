@@ -2,6 +2,7 @@ const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langc
 const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
 const { PromptTemplate } = require("@langchain/core/prompts");
 const { getVectorStore } = require("../utils/vectorStore"); 
+const {z} = require("zod");
 
 async function analyzePR(req, res) {
     const { prUrl } = req.body;
@@ -19,7 +20,6 @@ async function analyzePR(req, res) {
     const repoName = repo; // For MongoDB preFiltering
 
     try {
-        // 2. Fetch the raw diff from GitHub API
         const githubResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`, {
             headers: {
                 'Accept': 'application/vnd.github.v3.diff',
@@ -64,15 +64,20 @@ async function analyzePR(req, res) {
             Git Diff (The proposed changes):
             {diff}
         `);
+        
+        // pr analysis schema
+        const PRAnalysisSchema = z.object({
+            tldr: z.string().describe("1-2 sentence high-level summary of the PR."),
+            keyChanges: z.array(z.string()).describe("Array of 3-4 strings explaining functional changes."),
+            blastRadius: z.array(z.string()).describe("Array of strings highlighting files/systems that might break."),
+            localTesting: z.string().describe("Bash commands to test the PR locally.")
+        });
 
         const model = new ChatGoogleGenerativeAI({
             model: "gemini-2.5-flash",
             apiKey: process.env.GOOGLE_API_KEY,
             temperature: 0.1,
-            modelKwargs: { 
-                responseMimeType: "application/json" 
-            }
-        });
+        }).withStructuredOutput(PRAnalysisSchema);
 
         // Connect to vector store for the RAG Blast Radius Context
         const embeddings = new GoogleGenerativeAIEmbeddings({
@@ -81,8 +86,8 @@ async function analyzePR(req, res) {
         });
 
         const vectorStore = await getVectorStore(embeddings);
-        const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
-
+        // const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
+        
         const retriever = vectorStore.asRetriever({
             k: 3,
             filter: {
@@ -91,28 +96,37 @@ async function analyzePR(req, res) {
                 }
             }
         });
-
+        
         const query = changedFiles.join(" ");
         const retrievedDocs = await retriever.invoke(String(query));
+        const formattedContext = retrievedDocs.map(doc => doc.pageContent).join("\n\n");
 
-        const chainInput = {
-            input: String(query),
-            context: retrievedDocs,
-            changedFiles: changedFiles.join(", "),
-            diff: diffText
-        };
+        // const chainInput = {
+        //     input: String(query),
+        //     context: retrievedDocs,
+        //     changedFiles: changedFiles.join(", "),
+        //     diff: diffText
+        // };
 
-        const response = await combineDocsChain.invoke(chainInput);
+        const response = await model.invoke(
+            await prompt.format({
+                changedFiles: changedFiles.join(", "),
+                context: formattedContext,
+                diff: diffText,
+            })
+        );
 
-        let parsedData;
-        try {
-            parsedData = JSON.parse(response);
-        } catch (e) {
-            throw new Error("AI returned invalid JSON.");
-        }
+        console.log("PR Analysis: ", response);
+
+        // let parsedData;
+        // try {
+        //     parsedData = JSON.parse(response);
+        // } catch (e) {
+        //     throw new Error("AI returned invalid JSON.");
+        // }
 
         return res.status(200).json({
-            answer: parsedData 
+            answer: response 
         })
 
     } catch (error) {

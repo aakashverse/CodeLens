@@ -209,7 +209,7 @@ async function checkRepoStatus(req, res) {
         if (existingDoc) {
             return res.status(200).json({
                 isIndexed: true,
-                lastIndexed: existingDoc?.IndexedAt || "an unknown date"
+                lastIndexed: existingDoc?.indexedAt || "an unknown date"
             });
         } else {
             return res.status(200).json({ isIndexed: false });

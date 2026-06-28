@@ -1,12 +1,12 @@
 import {useContext} from "react";
 import { generateReadme } from "../services/readme.api";
 import {ReadmeContext} from "../context/readme.context";
-import { WorkspaceContext } from "../context/workspace.context";
+import { AiSessionContext } from "../context/ai-session.context";
 
 export const useReadme = () => {
     const context = useContext(ReadmeContext);
     const {setIsGenerating, setGeneratedMarkdown, setLogs} = context;
-    const { repoUrl } = useContext(WorkspaceContext);
+    const { repoUrl } = useContext(AiSessionContext);
     
     const handleGenerate = async () => {
         setIsGenerating(true);

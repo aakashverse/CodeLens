@@ -1,12 +1,12 @@
-import { useNavigate } from "react-router";
 import { useContext } from "react";
-import { AuthContext } from "../context/auth.context";
-import { WorkspaceContext } from "../context/workspace.context";
+import { useNavigate } from "react-router";
+import { AiSessionContext } from "../context/ai-session.context";
 import Navbar from "../components/Navbar";
+import useToast from "../hooks/useToast";
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
-  const { repoUrl } = useContext(WorkspaceContext);
+  const { repoUrl, resetSession } = useContext(AiSessionContext);
+  const {showSuccess} = useToast();
   const navigate = useNavigate();
 
   const repoName = repoUrl ? repoUrl.split('/').pop().replace('.git', '') : 'No Repository';
@@ -14,7 +14,7 @@ const Dashboard = () => {
   const tools = [
     {
       id: 'chat-codebase',
-      title: 'CodeLens AI Session',
+      title: 'CodeLens AI',
       goTo: '/ai-session',
       description: 'Chat with your repository. Instantly trace data flows and understand complex logic using GenAI.',
       icon: (
@@ -23,7 +23,7 @@ const Dashboard = () => {
       bgGradient: 'from-blue-500/10 to-indigo-500/10',
       borderHover: 'hover:border-blue-500/50',
       badge: 'Popular',
-      tags: ['MERN', 'GenAI']
+      tags: ['Code Review', 'RAG Pipeline', 'Semantic Search']
     },
     {
       id: 'architecture',
@@ -36,7 +36,7 @@ const Dashboard = () => {
       bgGradient: 'from-purple-500/10 to-fuchsia-500/10',
       borderHover: 'hover:border-purple-500/50',
       badge: 'Beta',
-      tags: ['React', 'Node.js']
+      tags: ['Dependency Graph', 'Visualization']
     },
     {
       id: 'smell-detector',
@@ -48,22 +48,8 @@ const Dashboard = () => {
       ),
       bgGradient: 'from-rose-500/10 to-orange-500/10',
       borderHover: 'hover:border-rose-500/50',
-      tags: ['Performance', 'Security']
-    },
-    {
-      id: 'pr-lens',
-      title: 'PR Lens & Blast Radius',
-      goTo: '/analyze-pr',
-      description: 'Paste a Pull Request URL to decode complex diffs, auto-generate testing commands, and detect breaking changes before merging.',
-      icon: (
-        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7v10M8 7a2 2 0 100-4 2 2 0 000 4zm0 10a2 2 0 100 4 2 2 0 000-4zm8-10v.01M16 7a2 2 0 100-4 2 2 0 000 4zm0 0c0 3-2 5-5 5H8" />
-        </svg>
-      ),
-      bgGradient: 'from-emerald-500/10 to-teal-500/10',
-      borderHover: 'hover:border-emerald-500/50',
-      badge: '🔥 Hyped',
-      tags: ['GitHub API', 'GenAI']
+      badge: 'Essential',
+      tags: ['Performance', 'Optimization', 'Security']
     },
     {
       id: 'auto-readme',
@@ -75,9 +61,39 @@ const Dashboard = () => {
       ),
       bgGradient: 'from-amber-500/10 to-amber-500/10',
       borderHover: 'hover:border-amber-500/50',
-      tags: ['Markdown', 'AST']
-    }
+      badge: 'Time Saver',
+      tags: ['Documentation', 'Automation', 'AST']
+    },
+     {
+      id: 'pr-lens',
+      title: 'PR Lens & Blast Radius',
+      goTo: '/analyze-pr',
+      description: 'Paste a Pull Request URL to decode complex diffs, auto-generate testing commands, and detect breaking changes before merging.',
+      icon: (
+        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7v10M8 7a2 2 0 100-4 2 2 0 000 4zm0 10a2 2 0 100 4 2 2 0 000-4zm8-10v.01M16 7a2 2 0 100-4 2 2 0 000 4zm0 0c0 3-2 5-5 5H8" />
+        </svg>
+      ),
+      bgGradient: 'from-emerald-500/10 to-teal-500/10',
+      borderHover: 'hover:border-emerald-500/50',
+      badge: '🔥 High Impact',
+      tags: ['PR Review', 'Risk Analysis', 'GitHub Diff']
+    },
   ];
+
+  const handleCardClick = (tool) => {
+    if (!repoUrl) {
+      navigate("/github-connect");
+    } else {
+      navigate(tool.goTo);
+    }
+  };
+
+  const handleDisconnect = async() => {
+    await resetSession();
+    showSuccess("Session Terminated.")
+    navigate('/');
+  }
 
   return (
     <div className="flex h-screen bg-[#0A0D14] overflow-hidden">
@@ -112,6 +128,15 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {repoUrl && (
+              <button 
+                  onClick={handleDisconnect}
+                  className="text-xs font-medium text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-3 py-1.5 rounded-full transition-all border border-red-400/20"
+                >
+                Disconnect
+              </button>
+            )}
+
             <button 
               className="relative p-2 md:p-2.5 text-gray-400 hover:text-gray-100 bg-gray-900/30 hover:bg-gray-800/80 border border-transparent hover:border-gray-700/50 rounded-full transition-all duration-200 active:scale-95 shrink-0" 
               title="Notifications"
@@ -139,7 +164,7 @@ const Dashboard = () => {
               {tools.map((tool) => (
                 <button 
                   key={tool.id}
-                  onClick={() => navigate(tool.goTo)}
+                  onClick={() => handleCardClick(tool)}
                   className={`group relative flex flex-col text-left bg-[#11151D] border border-gray-800/60 rounded-2xl p-5 md:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 ${tool.borderHover}`}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${tool.bgGradient} opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500 pointer-events-none`}></div>
@@ -154,7 +179,13 @@ const Dashboard = () => {
                           ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
                           : tool.badge === 'Beta' 
                           ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : tool.badge == 'Essential'
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          : tool.badge == '🔥 High Impact'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : tool.badge == 'Time Saver'
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          : 'bg-pink-500/10 text-pink-400 border-pink-500/20'
                       }`}>
                         {tool.badge}
                       </span>
@@ -188,6 +219,7 @@ const Dashboard = () => {
           </div>
         </main>
       </div>
+
 
     </div>
   );

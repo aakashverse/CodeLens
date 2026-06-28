@@ -1,13 +1,13 @@
 import { useContext } from 'react';
 import { useNavigate } from 'react-router';
-import { useWorkspace } from '../hooks/useWorkspace';
-import { WorkspaceContext } from '../context/workspace.context';
-import { checkRepoStatus } from "../services/workspace.api";
+import {useAiSession  } from '../hooks/useAi-session';
+import { AiSessionContext } from '../context/ai-session.context';
+import { checkRepoStatus } from "../services/ai-session.api";
 import useToast from '../hooks/useToast';
 
 const GithubConnectForm = () => {
-  const { isLoading, setIsLoading, handleConnect } = useWorkspace();
-  const { repoUrl, setRepoUrl } = useContext(WorkspaceContext);
+  const { isLoading, setIsLoading, handleConnect } = useAiSession();
+  const { repoUrl, setRepoUrl } = useContext(AiSessionContext);
   const {showSuccess, showError} = useToast();
 
   const navigate = useNavigate();
@@ -29,9 +29,9 @@ const GithubConnectForm = () => {
       if (isIndexed) {
         setIsLoading(false);
 
-        let dateStr = "Unknown";
+        let dateStr = "unknown";
 
-        if (indexedAt && !isNaN(new Date(indexedAt).getTime())) {
+        if (isIndexed && !isNaN(new Date(indexedAt).getTime())) {
           dateStr = new Date(indexedAt).toLocaleString(undefined, {
             year: "numeric",
             month: "long",

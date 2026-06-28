@@ -4,7 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const ConnectToDB = require("./src/config/db");
 const authRouter  = require("./src/routes/auth.route");
-const repoRouter  = require("./src/routes/repo.route");
+const AiSessionRouter  = require("./src/routes/ai-session.route");
 const readmeRouter = require("./src/routes/readme.route");
 const architectureRouter = require("./src/routes/architecture.route");
 const analyzeRouter = require("./src/routes/analyzer.route");
@@ -22,7 +22,7 @@ app.use(cors({
 ConnectToDB();
 
 app.use("/api/auth", authRouter);
-app.use("/api/repo", repoRouter);
+app.use("/api/repo", AiSessionRouter);
 app.use("/api/gen", readmeRouter);
 app.use("/api/visualize", architectureRouter);
 app.use("/api/analyze", analyzeRouter);

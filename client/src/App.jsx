@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import { AuthProvider } from './context/auth.context';
-import { WorkspaceProvider } from "./context/workspace.context";
+import { AiSessionProvider } from "./context/ai-session.context.jsx";
 import Dashboard from "./pages/Dashboard";
 import GithubConnectForm from "./components/GithubConnectForm";
 import AiSession from "./pages/AiSession";
@@ -22,7 +22,7 @@ import { RequireRepo } from "./components/RequireRepo.jsx";
 const App = () => {
   return (
     <AuthProvider>
-      <WorkspaceProvider>
+      <AiSessionProvider>
       <ArchitectureProvider>
       <AnalyzerProvider>
       <PrAnalyzerProvider>
@@ -36,22 +36,22 @@ const App = () => {
           <Route path='/login' element={<Login/>}/>
           <Route path='/dashboard' element={<Protected><Dashboard/></Protected>}/>
           <Route path='/github-connect' element={<Protected><GithubConnectForm/></Protected>}/>
-          <Route path='/ai-session' element={<Protected><RequireRepo><AiSession/></RequireRepo></Protected>}/>
-          <Route path='/readme' element={<Protected><RequireRepo><AutoReadme/></RequireRepo></Protected>}/>
-          <Route path='/architecture' element={<Protected><RequireRepo><ViewArchitecture/></RequireRepo></Protected>}/>
-          <Route path="/analyze-code" element={<Protected><RequireRepo><Analyzer/></RequireRepo></Protected>}/>
-          <Route path='/analyze-pr' element={<Protected><RequireRepo><PRAnalyzer/></RequireRepo></Protected>}/>
+          <Route path='/ai-session' element={<Protected><AiSession/></Protected>}/>
+          <Route path='/readme' element={<Protected><AutoReadme/></Protected>}/>
+          <Route path='/architecture' element={<Protected><ViewArchitecture/></Protected>}/>
+          <Route path="/analyze-code" element={<Protected><Analyzer/></Protected>}/>
+          <Route path='/analyze-pr' element={<Protected><PRAnalyzer/></Protected>}/>
 
           
         </Routes>
         
-        <ToastContainer position="top-right" />
+        <ToastContainer position="top-right" pauseOnHover="false"/>
       </BrowserRouter>
       </ReadmeProvider>
       </PrAnalyzerProvider>
       </AnalyzerProvider>
       </ArchitectureProvider>
-      </WorkspaceProvider>
+      </AiSessionProvider>
     </AuthProvider>
   )
 }

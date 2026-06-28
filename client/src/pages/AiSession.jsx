@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
-import { WorkspaceContext } from '../context/workspace.context';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { AiSessionContext } from '../context/ai-session.context';
+import { useAiSession } from '../hooks/useAi-session';
 import GithubConnectForm from '../components/GithubConnectForm';
 
 import ReactMarkdown from 'react-markdown';
@@ -9,9 +9,9 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const AiSession = () => {
-  const context = useContext(WorkspaceContext);  
+  const context = useContext(AiSessionContext);  
   const { repoUrl, sessionState, chatHistory = [], loadingText } = context;
-  const { handleConnect, handleSendMessage, isAiTyping, error } = useWorkspace();
+  const { handleConnect, handleSendMessage, isAiTyping, error } = useAiSession();
   
   const [chatInput, setChatInput] = useState('');
   
@@ -162,14 +162,6 @@ const AiSession = () => {
               </form>
             </main>
 
-            <aside className="w-72 bg-[#161B22] hidden md:flex flex-col shrink-0 border-l border-gray-800">
-              <div className="h-14 border-b border-gray-800 flex items-center px-4 bg-[#11151D] shrink-0">
-                <h2 className="font-semibold text-gray-400 text-[11px] uppercase tracking-wider">Workspace Tree</h2>
-              </div>
-              <div className="p-4 text-xs text-gray-500 font-mono flex-1 overflow-y-auto">
-                &gt; Indexing directory mapping...
-              </div>
-            </aside>
           </>
         )}
       </div>

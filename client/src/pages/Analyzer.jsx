@@ -1,26 +1,14 @@
-import { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useContext } from 'react';
 import { useAnalyzer } from '../hooks/useAnalyzer';
 import { AnalyzerContext } from '../context/analyzer.context';
-import { WorkspaceContext } from '../context/workspace.context';
-import useToast from '../hooks/useToast';
 
 const Analyzer = () => {
-  const navigate = useNavigate();
   const context = useContext(AnalyzerContext);
   
   const { isDetecting, detectedResults, logs } = context; 
-  const {showSuccess} = useToast();
-  const { resetSession } = useContext(WorkspaceContext);
   const { handleAnalyzeCode } = useAnalyzer();
 
   const [activeTab, setActiveTab] = useState('all'); 
-
-  const handleDisconnect = async() => {
-    await resetSession();
-    showSuccess("Session Terminated.")
-    navigate('/');
-  }
 
   // get color classes based on severity
   const getSeverityStyles = (severity) => {
@@ -45,12 +33,6 @@ const Analyzer = () => {
             <span className="w-2 h-2 rounded-full bg-green-500"></span>
             {/* {sessionState} */}
           </div>
-          <button 
-            onClick={handleDisconnect}
-            className="text-xs text-gray-500 hover:text-red-400 transition-colors"
-          >
-            Disconnect
-          </button>
         </div>
       </header>
 

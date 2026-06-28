@@ -1,29 +1,17 @@
-import { useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router';
-import { useWorkspace } from '../hooks/useWorkspace';
-import { WorkspaceContext } from '../context/workspace.context';
+import { useContext } from 'react';
+import { useAiSession } from '../hooks/useAi-session';
 import { ArchitectureContext } from '../context/architecture.context';
 import { useArchitecture } from '../hooks/useArchitecture';
 import MermaidDiagram from '../components/MermaidDiagram';
 import { generateMermaidSyntax } from '../hooks/useArchitecture';
-import useToast from '../hooks/useToast';
 
 const ViewArchitecture = () => {
-  const navigate = useNavigate();
-  const {showSuccess} = useToast();
-  const {resetSession} = useContext(WorkspaceContext);
-  const { activeWorkspace } = useWorkspace();
+  const { activeWorkspace } = useAiSession();
   const context = useContext(ArchitectureContext);
 
   const {isAnalyzing, architectureData, logs} = context;
 
   const {handleAnalyze} = useArchitecture();
-
-  const handleDisconnect = async() => {
-    await resetSession();
-    showSuccess("Session Terminated.")
-    navigate('/');
-  }
 
   return (
     <div className="flex flex-col h-screen bg-[#0A0D14] font-sans">
@@ -39,12 +27,6 @@ const ViewArchitecture = () => {
             <span className="w-2 h-2 rounded-full bg-green-500"></span>
             {activeWorkspace}
           </div>
-          <button 
-            onClick={handleDisconnect}
-            className="text-xs text-gray-500 hover:text-red-400 transition-colors"
-          >
-            Disconnect
-          </button>
         </div>
       </header>
 
