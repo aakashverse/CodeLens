@@ -1,6 +1,6 @@
 # 🔍 CodeLens
 
-> A collaborative platform designed to analyze GitHub repositories using Generative AI, allowing developers to query repository structures and logic through a natural language interface.
+> A collaborative codebase platform based on RAG(Retrieval-Augmented Generation) designed to analyze GitHub repositories using Generative AI, allowing developers to query repository structures and logic through a natural language interface.
 
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
@@ -32,7 +32,7 @@ The application follows a standard MERN stack architecture with a separate conta
 
 * **Frontend:** React 19 (Vite), Tailwind CSS, Axios
 * **Backend:** Node.js, Express, MongoDB (Mongoose)
-* **AI Integration:** LangChain, Google GenAI
+* **AI Integration:** LangChain, Google-GenAI
 * **Infrastructure:** Docker Compose (local dev), Render (Backend/Docker), Vercel (Frontend)
 
 ---
@@ -54,3 +54,20 @@ cd codelens
 # Copy environment templates
 cp server/.env.example server/.env
 cp client/.env.example client/.env
+```
+
+### 3. Backend & Database (Docker)
+Use the provided docker-compose.yml to spin up the database and backend services:
+
+```bash
+docker-compose up --build
+```
+
+### 4. Frontend Development Server
+In a new terminal window, navigate to the client directory and start the frontend:
+
+```bash
+cd client
+npm install
+npm run dev
+```
