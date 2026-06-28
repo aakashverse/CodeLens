@@ -14,7 +14,6 @@ const prRouter = require("./src/routes/pr.route");
 const app = express();
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
-console.log(allowedOrigins);
 
 app.use(cors({
     origin: allowedOrigins,
