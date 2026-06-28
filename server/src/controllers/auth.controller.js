@@ -100,7 +100,8 @@ async function logoutController(req, res){
 
     res.clearCookie("token", { 
         httpOnly: true,
-        sameSite: "lax"
+        secure: true,
+        sameSite: "none"
     });
 
     return res.status(200).json({
@@ -112,7 +113,11 @@ async function getMeController(req, res){
     const user = await userModel.findById(req.user.id);
 
     if(!user){
-        res.clearCookie("token");
+        res.clearCookie("token", { 
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        });
 
         return res.status(401).json({
             message: "Session expired"
