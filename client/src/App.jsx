@@ -17,7 +17,7 @@ import PRAnalyzer from "./pages/PrAnalyzer.jsx";
 import { PrAnalyzerProvider } from "./context/pr.context.jsx";
 import Protected from "./components/Protected.jsx";
 import {ToastContainer} from "react-toastify"
-import Docs from "./pages/docs.jsx";
+import Docs from "./pages/Docs.jsx";
 
 const App = () => {
   return (
