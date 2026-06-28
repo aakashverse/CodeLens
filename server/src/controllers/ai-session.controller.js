@@ -203,7 +203,6 @@ async function checkRepoStatus(req, res) {
         await client.connect();
         const collection = client.db(dbName).collection(collectionName);
 
-        // LangChain nesting wraps document values under the metadata property path
         const existingDoc = await collection.findOne({ "repoName": repoName });
 
         if (existingDoc) {

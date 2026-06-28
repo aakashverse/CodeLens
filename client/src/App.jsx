@@ -17,7 +17,7 @@ import PRAnalyzer from "./pages/PrAnalyzer.jsx";
 import { PrAnalyzerProvider } from "./context/pr.context.jsx";
 import Protected from "./components/Protected.jsx";
 import {ToastContainer} from "react-toastify"
-import { RequireRepo } from "./components/RequireRepo.jsx";
+import Docs from "./pages/docs.jsx";
 
 const App = () => {
   return (
@@ -41,11 +41,11 @@ const App = () => {
           <Route path='/architecture' element={<Protected><ViewArchitecture/></Protected>}/>
           <Route path="/analyze-code" element={<Protected><Analyzer/></Protected>}/>
           <Route path='/analyze-pr' element={<Protected><PRAnalyzer/></Protected>}/>
-
+          <Route path='/app-architecture' element={<Docs/>}/>
           
         </Routes>
         
-        <ToastContainer position="top-right" pauseOnHover="false"/>
+        <ToastContainer position="top-right" autoClose={1500} pauseOnFocusLoss={false}/>
       </BrowserRouter>
       </ReadmeProvider>
       </PrAnalyzerProvider>

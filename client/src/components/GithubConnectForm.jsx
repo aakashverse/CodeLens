@@ -22,17 +22,17 @@ const GithubConnectForm = () => {
       const res = await checkRepoStatus(repoUrl);
 
       const isIndexed = res?.isIndexed;
-      const indexedAt = res?.indexedAt || res?.IndexedAt;
+      const lastIndexed = res?.lastIndexed;
 
-      console.log(isIndexed, indexedAt);
+      console.log(isIndexed, lastIndexed);
 
       if (isIndexed) {
         setIsLoading(false);
 
         let dateStr = "unknown";
 
-        if (isIndexed && !isNaN(new Date(indexedAt).getTime())) {
-          dateStr = new Date(indexedAt).toLocaleString(undefined, {
+        if (isIndexed && !isNaN(new Date(lastIndexed).getTime())) {
+          dateStr = new Date(lastIndexed).toLocaleString(undefined, {
             year: "numeric",
             month: "long",
             day: "numeric",

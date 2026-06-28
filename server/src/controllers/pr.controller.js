@@ -17,7 +17,7 @@ async function analyzePR(req, res) {
     }
 
     const [, owner, repo, prNumber] = match;
-    const repoName = repo; // For MongoDB preFiltering
+    const repoName = repo; // For mongoDB preFiltering
 
     try {
         const githubResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`, {
@@ -79,7 +79,7 @@ async function analyzePR(req, res) {
             temperature: 0.1,
         }).withStructuredOutput(PRAnalysisSchema);
 
-        // Connect to vector store for the RAG Blast Radius Context
+        // connnect to vector store for the RAG Blast Radius Context
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: process.env.GOOGLE_API_KEY,
             model: "gemini-embedding-001",
@@ -101,13 +101,6 @@ async function analyzePR(req, res) {
         const retrievedDocs = await retriever.invoke(String(query));
         const formattedContext = retrievedDocs.map(doc => doc.pageContent).join("\n\n");
 
-        // const chainInput = {
-        //     input: String(query),
-        //     context: retrievedDocs,
-        //     changedFiles: changedFiles.join(", "),
-        //     diff: diffText
-        // };
-
         const response = await model.invoke(
             await prompt.format({
                 changedFiles: changedFiles.join(", "),
@@ -117,13 +110,6 @@ async function analyzePR(req, res) {
         );
 
         console.log("PR Analysis: ", response);
-
-        // let parsedData;
-        // try {
-        //     parsedData = JSON.parse(response);
-        // } catch (e) {
-        //     throw new Error("AI returned invalid JSON.");
-        // }
 
         return res.status(200).json({
             answer: response 

@@ -6,10 +6,6 @@ const { PromptTemplate } = require("@langchain/core/prompts");
 
 const { getVectorStore } = require("../utils/vectorStore");
 
-// const client = new MongoClient(process.env.MONGO_URI);
-// const collectionName = "code_embeddings";
-// const dbName = "codelens";
-
 // create readme function
 async function generateReadme(req, res) {
     const { githubUrl } = req.body;
@@ -31,9 +27,6 @@ async function generateReadme(req, res) {
             apiKey: process.env.GOOGLE_API_KEY,
             model: "gemini-embedding-001", 
         });
-
-        // await client.connect();
-        // const collection = client.db(dbName).collection(collectionName);
 
         const prompt = PromptTemplate.fromTemplate(`
             Generate a professional 'README.md' using the project context retrieved from the vector store.
