@@ -18,10 +18,10 @@ const Register = () => {
     e.preventDefault();
     try {
       await handleRegister({ username, email, password, role });
-      showSuccess("Registered Successfully");
+      showSuccess("Registration Successful");
       navigate("/");
     } catch (error) {
-      showError("user Already exists, try Login");
+      showError("Registration failed, try again");
     }
   };
 

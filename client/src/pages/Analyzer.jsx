@@ -4,12 +4,13 @@ import { AnalyzerContext } from '../context/analyzer.context';
 
 const Analyzer = () => {
   const context = useContext(AnalyzerContext);
-  
   const { isDetecting, detectedResults, logs } = context; 
+
   const { handleAnalyzeCode } = useAnalyzer();
-
   const [activeTab, setActiveTab] = useState('all'); 
-
+  const issues = detectedResults?.issues ?? [];
+  const healthScore = detectedResults?.healthScore ?? 0;
+  
   // get color classes based on severity
   const getSeverityStyles = (severity) => {
     switch(severity) {
@@ -93,8 +94,8 @@ const Analyzer = () => {
               
               <div className="md:col-span-1 space-y-4">
                 <div className="bg-[#11151D] border border-gray-800 rounded-xl p-6 text-center relative overflow-hidden">
-                  <div className={`absolute top-0 left-0 w-full h-1 ${detectedResults.healthScore > 80 ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                  <div className="text-5xl font-bold text-white mb-2">{detectedResults.healthScore}</div>
+                  <div className={`absolute top-0 left-0 w-full h-1 ${healthScore > 80 ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                  <div className="text-5xl font-bold text-white mb-2">{healthScore}</div>
                   <div className="text-sm text-gray-400 uppercase tracking-wider font-semibold">Health Score</div>
                 </div>
 
@@ -114,11 +115,11 @@ const Analyzer = () => {
               <div className="md:col-span-3 bg-[#11151D] border border-gray-800 rounded-xl overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-gray-800 bg-[#161b22] flex justify-between items-center">
                   <h3 className="font-medium text-gray-200">Detected Anomalies</h3>
-                  <span className="text-xs text-gray-500 font-mono">{detectedResults?.issues?.length} total issues</span>
+                  <span className="text-xs text-gray-500 font-mono">{issues.length} total issues</span>
                 </div>
                 
                 <div className="divide-y divide-gray-800/50 max-h-[500px] overflow-y-auto">
-                  {detectedResults.issues
+                  {issues
                     .filter(issue => activeTab === 'all' || issue.severity === activeTab)
                     .map((issue, idx) => (
                     <div key={idx} className="p-5 hover:bg-gray-900/20 transition-colors group">
@@ -139,7 +140,7 @@ const Analyzer = () => {
                     </div>
                   ))}
                   
-                  {detectedResults.issues.filter(i => activeTab === 'all' || i.severity === activeTab).length === 0 && (
+                  {issues.filter(i => activeTab === 'all' || i.severity === activeTab).length === 0 && (
                     <div className="p-8 text-center text-gray-500 italic text-sm">
                       No issues found in this category. Great job!
                     </div>

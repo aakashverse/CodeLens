@@ -1,15 +1,20 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 import { AiSessionContext } from "../context/ai-session.context";
+import { useAuth } from "../hooks/useAuth"; 
 import Navbar from "../components/Navbar";
 import useToast from "../hooks/useToast";
 
 const Dashboard = () => {
-  const { repoUrl, resetSession } = useContext(AiSessionContext);
-  const {showSuccess} = useToast();
+  const { repoUrl, resetSession, selectedModel} = useContext(AiSessionContext);
+  const { user } = useAuth(); 
+  const { showSuccess } = useToast();
   const navigate = useNavigate();
 
   const repoName = repoUrl ? repoUrl.split('/').pop().replace('.git', '') : 'No Repository';
+  
+  const isApiConnected = user?.hasApiKey;
+  const currentModel = user?.aiModel;
 
   const tools = [
     {
@@ -91,7 +96,7 @@ const Dashboard = () => {
 
   const handleDisconnect = async() => {
     await resetSession();
-    showSuccess("Session Terminated.")
+    showSuccess("Session Terminated.");
     navigate('/');
   }
 
@@ -104,25 +109,45 @@ const Dashboard = () => {
         
         <header className="sticky top-0 z-30 bg-[#0A0D14]/90 backdrop-blur-md border-b md:border-none border-gray-800/60 pl-16 pr-4 py-3 md:px-8 md:py-6 lg:px-12 w-full flex justify-between items-center transition-all">
           
-          <div className="flex items-center shrink-0">
-            <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight truncate">
-              AI Codebase RAG
-            </h1>
-          </div>
+          <div className="flex group items-center gap-2.5 cursor-default bg-gray-900/40 border border-gray-800/60 px-1.5 py-1 sm:px-3 sm:py-2 rounded-full transition-all duration-300 shadow-sm max-w-[110px]  sm:max-w-[150px] lg:max-w-xs">
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 shrink-0 rounded-full flex items-center justify-center ring-2 ring-[#0A0D14] transition-all duration-300 ${
+                isApiConnected
+                  ? 'bg-green-500/10 text-green-400 group-hover:shadow-[0_0_10px_rgba(74,222,128,0.2)]'
+                  : 'bg-orange-500/10 text-orange-400'
+                }`}>
+                {/* ai-icon */}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <div className="flex flex-col justify-center overflow-hidden pr-1">
+               <span className="text-[11px] sm:text-sm font-semibold text-gray-200 truncate leading-tight">
+                  {currentModel}
+                </span>
+                <span className={`text-[8px] sm:text-[10px] font-medium truncate uppercase tracking-wider leading-tight ${
+                  isApiConnected
+                    ? 'text-green-500/80'
+                    : 'text-orange-500/80 animate-pulse'
+                  }`}>
+                  {isApiConnected ? 'API Ready' : 'Needs Config'}
+                </span>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+          <div className="flex items-center gap-1 sm:gap-4 ml-auto">
             
-            <div className="hidden sm:flex group items-center gap-2.5 cursor-pointer bg-gray-900/40 hover:bg-gray-800/60 border border-gray-800/60 hover:border-gray-700/80 px-2 py-1.5 md:px-3 md:py-2 rounded-full transition-all duration-300 max-w-[150px] lg:max-w-xs shadow-sm hover:shadow-md hover:shadow-black/20 active:scale-[0.98]">
-              <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-gray-800/80 flex items-center justify-center text-gray-400 group-hover:text-blue-400 ring-2 ring-[#0A0D14] group-hover:ring-gray-600 transition-all duration-300">
+          {/*repo pill */}
+            <div className="flex group items-center gap-1 sm:gap-2.5 cursor-pointer bg-gray-900/40 hover:bg-gray-800/60 border border-gray-800/60 hover:border-gray-700/80 px-1.5 py-1 sm:px-3 sm:py-2 rounded-full transition-all duration-300 max-w-[110px] sm:max-w-[150px] lg:max-w-xs shadow-sm hover:shadow-md hover:shadow-black/20 active:scale-[0.98]">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 rounded-full bg-blue-500/40 flex items-center justify-center">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div className="flex flex-col justify-center overflow-hidden pr-1">
-                <span className="text-[13px] md:text-sm font-semibold text-gray-200 truncate leading-tight group-hover:text-white transition-colors">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-200 truncate leading-tight group-hover:text-white transition-colors">
                   {repoName}
                 </span>
-                <span className="text-[9px] md:text-[10px] text-blue-500/80 font-medium truncate uppercase tracking-wider leading-tight group-hover:text-blue-400 transition-colors">
+                <span className="text-[8px] sm:text-[10px] text-blue-500/80 font-medium truncate uppercase tracking-wider leading-tight group-hover:text-blue-400 transition-colors">
                   {repoUrl ? 'Active Repo' : 'Disconnected'}
                 </span>
               </div>
@@ -131,7 +156,7 @@ const Dashboard = () => {
             {repoUrl && (
               <button 
                   onClick={handleDisconnect}
-                  className="text-xs font-medium text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-3 py-1.5 rounded-full transition-all border border-red-400/20"
+                  className="text-[10px] sm:text-xs px-2 py-1 sm:px-3 sm:py-1.5 font-medium text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 rounded-full transition-all border border-red-400/20"
                 >
                 Disconnect
               </button>
@@ -226,3 +251,7 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+

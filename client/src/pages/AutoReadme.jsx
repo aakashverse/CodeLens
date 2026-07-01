@@ -1,12 +1,8 @@
-import { useState, useContext } from 'react';
+import { useContext } from 'react';
 import { useReadme } from '../hooks/useReadme';
 import useToast from '../hooks/useToast';
 
 // Markdown Imports
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ReadmeContext } from '../context/readme.context';
 import { AiSessionContext } from '../context/ai-session.context';
 
@@ -17,8 +13,6 @@ const AutoReadme = () => {
   const {isGenerating, generatedMarkdown, logs} = context;
   const { repoUrl } = useContext(AiSessionContext);
   const {handleGenerate} = useReadme();
-  
-  const [viewMode, setViewMode] = useState('preview'); 
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedMarkdown);
@@ -63,14 +57,8 @@ const AutoReadme = () => {
                 <>
                   <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
                     <button 
-                      onClick={() => setViewMode('preview')}
-                      className={`px-3 py-1 text-xs rounded-md transition-all font-medium ${viewMode === 'preview' ? 'bg-gray-700 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
-                    >
-                      Preview
-                    </button>
-                    <button 
                       onClick={() => setViewMode('code')}
-                      className={`px-3 py-1 text-xs rounded-md transition-all font-medium ${viewMode === 'code' ? 'bg-gray-700 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
+                      className={`px-3 py-1 text-xs rounded-md transition-all font-medium bg-gray-700 text-white shadow-sm`}
                     >
                       Raw Code
                     </button>
@@ -125,41 +113,11 @@ const AutoReadme = () => {
 
             {!isGenerating && generatedMarkdown && (
               <div className="flex-1 w-full max-w-4xl mx-auto">
-                {viewMode === 'preview' ? (
-                  <div className="prose prose-invert prose-pre:bg-[#0d1117] prose-pre:border prose-pre:border-gray-800 max-w-none">
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        code({node, inline, className, children, ...props}) {
-                          const match = /language-(\w+)/.exec(className || '');
-                          return !inline && match ? (
-                            <SyntaxHighlighter
-                              style={vscDarkPlus}
-                              language={match[1]}
-                              PreTag="div"
-                              customStyle={{ margin: 0, background: 'transparent' }}
-                              {...props}
-                            >
-                              {String(children).replace(/\n$/, '')}
-                            </SyntaxHighlighter>
-                          ) : (
-                            <code className="bg-gray-800 text-purple-300 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                              {children}
-                            </code>
-                          )
-                        }
-                      }}
-                    >
-                      {generatedMarkdown}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
                   <textarea 
                     readOnly
                     value={generatedMarkdown}
                     className="w-full h-full min-h-[500px] bg-transparent text-gray-300 font-mono text-sm resize-none focus:outline-none scrollbar-hide"
                   />
-                )}
               </div>
             )}
             

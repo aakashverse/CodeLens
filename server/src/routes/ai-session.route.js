@@ -10,5 +10,6 @@ AiSessionRouter.post('/chat', authUser, AiSessionController.chatWithCodebase);
 
 AiSessionRouter.get('/check-status', authUser, AiSessionController.checkRepoStatus);
 
+AiSessionController
 
 module.exports = AiSessionRouter;

@@ -10,6 +10,7 @@ const readmeRouter = require("./src/routes/readme.route");
 const architectureRouter = require("./src/routes/architecture.route");
 const analyzeRouter = require("./src/routes/analyzer.route");
 const prRouter = require("./src/routes/pr.route");
+const encryptionRouter = require("./src/routes/settings.route");
 
 const app = express();
 
@@ -32,10 +33,11 @@ app.use("/api/gen", readmeRouter);
 app.use("/api/visualize", architectureRouter);
 app.use("/api/analyze", analyzeRouter);
 app.use("/api/pr", prRouter);
+app.use("/api/user", encryptionRouter);
 
 app.get("/health", (req, res) => {  
     return res.status(201).json({
-        message: "KYC is healthy :)"
+        message: "CodeLens is healthy :)"
     })
 })
 

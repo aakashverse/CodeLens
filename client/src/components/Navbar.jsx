@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router'; 
 import { useAuth } from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
+import SettingsModal from '../pages/SettingsModal'; 
 
 const Navbar = () => {
   const { user, handleLogout } = useAuth();
@@ -11,6 +12,7 @@ const Navbar = () => {
   
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false); 
 
   const handleNav = (path) => {
     navigate(path);
@@ -24,11 +26,10 @@ const Navbar = () => {
     navigate("/");
   };
 
-
   const getLinkStyles = (path) => {
     const isActive = location.pathname === path;
     return `
-      group relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium
+      group relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium w-full
       ${isActive 
         ? 'bg-gradient-to-r from-blue-500/10 to-transparent text-blue-400' 
         : 'text-gray-400 hover:bg-gray-800/40 hover:text-gray-200'}
@@ -39,9 +40,9 @@ const Navbar = () => {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="md:hidden fixed top-3 left-4 z-40 p-2 bg-[#0E1117] border border-gray-800 rounded-lg text-gray-400 hover:text-white shadow-lg"
+        className="md:hidden mt-1 mb-1 fixed top-3 left-4 z-40 p-2 bg-[#0E1117] border border-gray-800 rounded-lg text-gray-400 hover:text-white shadow-lg"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
       </button>
 
       {isOpen && (
@@ -59,18 +60,14 @@ const Navbar = () => {
         <div className="flex items-center gap-3 w-full">
 
           <div className="w-8 h-8 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-center shrink-0 shadow-lg shadow-black/40">
-
             <svg className="w-10 h-10 text-gray-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-
               <circle cx="10.5" cy="10.5" r="8" stroke="currentColor" strokeWidth="1.5" />
               <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-
               <g className="text-blue-500" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M7 8L4 10.5L7 13" />
                 <path d="M9.5 14.5L11.5 6.5" />
                 <path d="M14 8L17 10.5L14 13" />
               </g>
-
             </svg>
           </div>
 
@@ -87,8 +84,9 @@ const Navbar = () => {
       </div>
         
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 flex flex-col gap-6 scrollbar-hide">
-          
           <nav className="space-y-6 px-3">
+            
+            {/* Platform Section */}
             <div>
               {!isCollapsed && <p className="px-3 text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-2">Platform</p>}
               <div className="space-y-1">
@@ -100,11 +98,12 @@ const Navbar = () => {
               </div>
             </div>
 
+            {/* Resources Section */}
             <div>
               {!isCollapsed && <p className="px-3 text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-2">Resources</p>}
               <div className="space-y-1">
-                <button onClick={() => handleNav('/app-architecture')} className={getLinkStyles('/docs')} title={isCollapsed ? "Documentation" : ""}>
-                  {location.pathname === '/docs' && !isCollapsed && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>}
+                <button onClick={() => handleNav('/app-architecture')} className={getLinkStyles('/app-architecture')} title={isCollapsed ? "How it Works" : ""}>
+                  {location.pathname === '/app-architecture' && !isCollapsed && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>}
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09l2.846.813-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                   </svg>
@@ -112,6 +111,27 @@ const Navbar = () => {
                 </button>
               </div>
             </div>
+
+            <div>
+              {!isCollapsed && <p className="px-3 text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-2">Preferences</p>}
+              <div className="space-y-1">
+                <button 
+                  onClick={() => {
+                    setIsSettingsOpen(true);
+                    setIsOpen(false); 
+                  }} 
+                  className={getLinkStyles('#')} 
+                  title={isCollapsed ? "Settings" : ""}
+                >
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {!isCollapsed && <span className="whitespace-nowrap">Settings</span>}
+                </button>
+              </div>
+            </div>
+
           </nav>
         </div>
 
@@ -149,6 +169,11 @@ const Navbar = () => {
           )}
         </div>
       </aside>
+
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </>
   );
 };

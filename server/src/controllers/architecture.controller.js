@@ -4,12 +4,17 @@ const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
 const { getVectorStore } = require("../utils/vectorStore"); 
+const User = require("../models/user.models");
 
-/**
- * Endpoint: POST /api/repo/architecture
- * Analyzes codebase context chunks to map system technology stack architecture.
- */
+const { decrypt } = require("../utils/encryption");
+
 async function generateArchitecture(req, res) {
+    const user = await User.findById(req.user.id);
+
+    if (!user.geminiApiKey) {
+      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    }
+    
     const { githubUrl } = req.body;
     
     if(!githubUrl){
@@ -17,6 +22,7 @@ async function generateArchitecture(req, res) {
     }
 
     const repoName = githubUrl.split('/').pop().replace('.git', '');
+    const encryptedKey = decrypt(user.geminiApiKey);
 
     const prompt = PromptTemplate.fromTemplate(`
         You are CodeLens AI, an elite software architect. 
@@ -45,8 +51,8 @@ async function generateArchitecture(req, res) {
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            model: "gemini-2.5-flash",
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
+            model: user.aiModel,
             temperature: 0.1, 
             modelKwargs: {
                 responseMimeType: "application/json",
@@ -54,7 +60,7 @@ async function generateArchitecture(req, res) {
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
             model: "gemini-embedding-001", 
         });
 

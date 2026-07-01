@@ -3,8 +3,16 @@ const { createStuffDocumentsChain } = require("langchain/chains/combine_document
 const { PromptTemplate } = require("@langchain/core/prompts");
 const { getVectorStore } = require("../utils/vectorStore"); 
 const {z} = require("zod");
+const User = require("../models/user.models");
+const { decrypt } = require("../utils/encryption");
 
 async function analyzePR(req, res) {
+    const user = await User.findById(req.user.id);
+
+    if (!user.geminiApiKey) {
+      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    }
+    
     const { prUrl } = req.body;
 
     if(!prUrl) {
@@ -18,6 +26,8 @@ async function analyzePR(req, res) {
 
     const [, owner, repo, prNumber] = match;
     const repoName = repo; // For mongoDB preFiltering
+
+    const encryptedKey = decrypt(user.geminiApiKey);
 
     try {
         const githubResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`, {
@@ -74,14 +84,14 @@ async function analyzePR(req, res) {
         });
 
         const model = new ChatGoogleGenerativeAI({
-            model: "gemini-2.5-flash",
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
+            model: user.aiModel,
             temperature: 0.1,
         }).withStructuredOutput(PRAnalysisSchema);
 
         // connnect to vector store for the RAG Blast Radius Context
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
             model: "gemini-embedding-001",
         });
 

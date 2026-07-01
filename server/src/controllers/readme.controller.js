@@ -3,11 +3,18 @@ const { MongoDBAtlasVectorSearch } = require("@langchain/mongodb");
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
 const { PromptTemplate } = require("@langchain/core/prompts");
-
+const User = require("../models/user.models");
 const { getVectorStore } = require("../utils/vectorStore");
+const { decrypt } = require("../utils/encryption");
 
 // create readme function
 async function generateReadme(req, res) {
+    const user = await User.findById(req.user.id);
+
+    if (!user.geminiApiKey) {
+      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    }
+    
     const { githubUrl } = req.body;
 
     if (!githubUrl) {
@@ -15,16 +22,17 @@ async function generateReadme(req, res) {
     }
 
     const repoName = githubUrl.split('/').pop().replace('.git', '');
+    const encryptedKey = decrypt(user.geminiApiKey);
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            model: "gemini-2.5-flash",
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
+            model: user.aiModel,
             temperature: 0.1,
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
             model: "gemini-embedding-001", 
         });
 

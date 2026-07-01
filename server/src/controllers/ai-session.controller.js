@@ -9,21 +9,28 @@ const { PromptTemplate } = require("@langchain/core/prompts");
 const { cloneAndExtract } = require('../utils/githubFetcher');
 const { getVectorStore } = require("../utils/vectorStore");
 const { MongoClient } = require("mongodb");
+const User = require("../models/user.models");
+const { decrypt } = require("../utils/encryption");
 
 const client = new MongoClient(process.env.MONGO_URI);
 const collectionName = "code_embeddings";
 const dbName = "codelens";
 
-/**
- * Endpoint: POST /api/repo/connect
- * Reads, chunks, embeds, and saves repository files.
- */
+
 async function initializeRepoSession(req, res){
+    const user = await User.findById(req.user.id);
+    
+    if (!user.geminiApiKey) {
+      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    }
+
     const { githubUrl } = req.body;
 
     if(!githubUrl){
         return res.status(400).json({ error: "GitHub URL is required." });
     }
+
+    const encryptedKey = decrypt(user.geminiApiKey);
 
     const repoName = githubUrl.split('/').pop().replace('.git', '');
 
@@ -70,7 +77,7 @@ async function initializeRepoSession(req, res){
 
         console.log(`[Atlas RAG] 4. Initializing Google Embeddings...`);
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
             modelName: "gemini-embedding-001", 
             maxConcurrency: 1, 
             maxRetries: 2
@@ -110,11 +117,18 @@ async function initializeRepoSession(req, res){
     }
 }
 
-/**
- * Endpoint: POST /api/repo/chat
- * Performs similarity search and answers code questions.
- */
+
 async function chatWithCodebase(req, res){
+    const user = await User.findById(req.user.id);
+
+    if (!user.geminiApiKey) {
+      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    }
+
+    // console.log("without decrypt: ", user.geminiApiKey);
+    const encryptedKey = decrypt(user.geminiApiKey);
+    // console.log("with decrypt: ", rawApiKey);
+
     const { question, githubUrl } = req.body;
 
     if (!question || !githubUrl) {
@@ -125,13 +139,13 @@ async function chatWithCodebase(req, res){
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            model: "gemini-2.5-flash",
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
+            model: user.aiModel,
             temperature: 0.1, 
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
             modelName: "gemini-embedding-001",
         });
 

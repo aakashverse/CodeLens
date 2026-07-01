@@ -15,6 +15,14 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         enum: ["Student", "Employee"]
+    },
+    geminiApiKey: {
+        type: String,
+        default: null
+    },
+    aiModel: {
+        type: String,
+        default: 'gemini-2.5-flash'
     }
 })
 

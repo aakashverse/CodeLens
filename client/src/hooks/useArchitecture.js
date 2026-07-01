@@ -1,5 +1,5 @@
 import {useContext} from "react";
-import { generateArchitecture } from "../services/architecture.api";
+import { generateArchitecture } from "../api/architecture.api";
 import { ArchitectureContext } from "../context/architecture.context";
 import { AiSessionContext } from "../context/ai-session.context";
 

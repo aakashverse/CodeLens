@@ -6,16 +6,25 @@ const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
 const {getVectorStore} = require("../utils/vectorStore"); 
+const User = require("../models/user.models");
+const { decrypt } = require("../utils/encryption");
 
 // analyzer function
 async function AnalyzeCode(req, res) {
+    const user = await User.findById(req.user.id);
+    
+    if (!user.geminiApiKey) {
+      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    }
+
     const { githubUrl } = req.body;
     
     if (!githubUrl) {
         return res.status(400).json({ error: "GitHub URL is required." });
     }
-
+    
     const repoName = githubUrl.split('/').pop().replace('.git', '');
+    const encryptedKey = decrypt(user.geminiApiKey);
 
     const prompt = PromptTemplate.fromTemplate(`
         You are CodeLens AI, an elite static code analyzer and senior software architect. 
@@ -52,8 +61,8 @@ async function AnalyzeCode(req, res) {
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            model: "gemini-2.5-flash",
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
+            model: user.aiModel,
             temperature: 0.1, 
             modelKwargs: {
                 responseMimeType: "application/json",
@@ -61,7 +70,7 @@ async function AnalyzeCode(req, res) {
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: process.env.GOOGLE_API_KEY,
+            apiKey: encryptedKey,
             model: "gemini-embedding-001",
         });
 
@@ -104,7 +113,7 @@ async function AnalyzeCode(req, res) {
         });
 
     } catch (error) {
-        console.error("Architecture Extraction Error: ", error);
+        console.error("Analysis Error: ", error);
         return res.status(500).json({ error: "An internal server error occurred while analyzing the codebase." });
     }
 }

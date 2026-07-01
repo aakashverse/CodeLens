@@ -1,9 +1,4 @@
-import axios from "axios";
-
-    const api = axios.create({
-        baseURL: import.meta.env.VITE_API_URL,
-        withCredentials: true
-    });
+import api from "../utils/axios";
 
     export async function register({username, email, password, role}){
         try{
@@ -29,6 +24,7 @@ import axios from "axios";
 
         } catch(err) {
             console.log(err.message)
+            throw err;
         }
     }
 
@@ -38,6 +34,7 @@ import axios from "axios";
             return response.data;
         } catch(err) {
             console.log(err.message);
+            throw err;
         }
     }
 
@@ -47,5 +44,6 @@ import axios from "axios";
             return response.data;
         } catch(err){
             console.log(err.message);
+            throw err;
         }
     }

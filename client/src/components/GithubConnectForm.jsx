@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { useNavigate } from 'react-router';
 import {useAiSession  } from '../hooks/useAi-session';
 import { AiSessionContext } from '../context/ai-session.context';
-import { checkRepoStatus } from "../services/ai-session.api";
+import { checkRepoStatus } from "../api/ai-session.api";
 import useToast from '../hooks/useToast';
 
 const GithubConnectForm = () => {

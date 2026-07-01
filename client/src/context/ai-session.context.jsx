@@ -8,6 +8,9 @@ export const AiSessionProvider = ({ children }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [loadingText, setLoadingText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
 
   const resetSession = () => {
     setRepoUrl('');
@@ -24,6 +27,9 @@ export const AiSessionProvider = ({ children }) => {
       chatHistory, setChatHistory,
       loadingText, setLoadingText,
       isLoading, setIsLoading,
+      apiKey, setApiKey,
+      selectedModel, setSelectedModel,
+      isSaving, setIsSaving,
       resetSession
     }}>
       {children}

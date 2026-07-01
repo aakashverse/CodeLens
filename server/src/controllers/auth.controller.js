@@ -48,7 +48,9 @@ async function registerController(req, res) {
         user: {
             id: newUser._id,
             username: newUser.username,
-            email: newUser.email
+            email: newUser.email,
+            hasApiKey: !!newUser.geminiApiKey,
+            aiModel: newUser.aiModel
         }
     })
 
@@ -91,6 +93,8 @@ async function loginController(req, res) {
             id: user._id,
             username: user.username,
             email: user.email,
+            hasApiKey: !!user.geminiApiKey,
+            aiModel: user.aiModel
         }
     })
 }
@@ -128,7 +132,9 @@ async function getMeController(req, res){
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            hasApiKey: !!user.geminiApiKey,
+            aiModel: user.aiModel
         }
     })
 }
