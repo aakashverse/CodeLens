@@ -1,73 +1,99 @@
 # 🔍 CodeLens
 
-> A collaborative codebase platform based on RAG(Retrieval-Augmented Generation) designed to analyze GitHub repositories using Generative AI, allowing developers to query repository structures and logic through a natural language interface.
+> A RAG (Retrieval-Augmented Generation) powered code intelligence platform that analyzes GitHub repositories using Generative AI, enabling developers to understand, explore, and query large codebases through natural language.
 
-![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
-![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+<p align="center">
+  <a href="https://code-lens-tau.vercel.app"><strong>Live Demo</strong></a>
+</p>
 
 ---
 
-## Problem Context
-Standard documentation for large repositories is often outdated or difficult to parse. CodeLens addresses this by creating an indexed knowledge base of a repository, allowing developers to ask context-aware questions about codebases without manually reading through thousands of files.
+## ✨ Features
+
+- 🤖 Chat with any GitHub repo(codebase) using RAG
+- 📄 AI-powered README generation
+- 🏗️ Interactive architecture visualization
+- 🔍 Code smell detection
+- 🔀 PRLens: Pull Request analysis
+- 💥 Blast Radius (PR Impact analysis)
+- 🔐 JWT authentication
+- 🔒 AES-256-CBC encrypted API key storage
+- 🐳 Dockerized backend deployment
 
 ---
 
-## Key Features
-- **Repository Connection:** Securely fetch and parse GitHub repository structures with the help of vector embeddings.
-- **CodeLens AI:** Chat with your repository using an integrated LLM to find the exact context in a messy codebase.
-- **Auto-Readme Generator:** Uses the same repository context to automatically generate a comprehensive README file for your project.
-- **Architecture Viewer:** Visualize the complex architecture of your system.
-- **Code Smell Detector:** Judge the code based on performance, efficiency, and security to analyze and prevent bottlenecks.
-- **PRLens Analyzer:** Understand and analyze Pull Requests to streamline the review process.
-- **Blast Radius:** Prevent bottlenecks before merging by finding the exact affected areas of a Pull Request.
-- **User Auth:** JWT-based session management using HttpOnly cookies with Header fallback.
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Frontend | React 19, Vite, Tailwind CSS, Axios |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| AI | LangChain, Google GenAI, RAG |
+| Deployment | Docker, Render, Vercel |
 
 ---
 
-## Technical Architecture
-The application follows a standard MERN stack architecture with a separate containerized backend to handle the compute-heavy tasks of repository parsing and LLM communication.
+## ⚙️ Setup
 
-* **Frontend:** React 19 (Vite), Tailwind CSS, Axios
-* **Backend:** Node.js, Express, MongoDB (Mongoose)
-* **AI Integration:** LangChain, Google-GenAI
-* **Infrastructure:** Docker Compose (local dev), Render (Backend/Docker), Vercel (Frontend)
+### Prerequisites
 
----
+- Node.js 22+
+- Docker Desktop
+- Google AI (Gemini) API Key
 
-## Quick Start
-
-### 1. Prerequisites
-Ensure you have the following installed on your local machine:
-* [Node.js](https://nodejs.org/) (v22+)
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
-### 2. Setup
-Clone the repository and set up your environment variables:
+### Installation
 
 ```bash
-git clone [https://github.com/aakashverse/CodeLens.git](https://github.com/aakashverse/CodeLens.git)
-cd codelens
-
-# Copy environment templates
-cp server/.env.example server/.env
-cp client/.env.example client/.env
+git clone https://github.com/aakashverse/CodeLens.git
+cd CodeLens
 ```
 
-### 3. Backend & Database (Docker)
-Use the provided docker-compose.yml to spin up the database and backend services:
+Install dependencies:
 
 ```bash
-docker-compose up --build
+cd server
+npm install
+
+cd ../client
+npm install
 ```
 
-### 4. Frontend Development Server
-In a new terminal window, navigate to the client directory and start the frontend:
+### Run the backend
+
+Using Docker:
+
+```bash
+docker compose up --build
+```
+
+Or locally:
+
+```bash
+cd server
+npm run dev
+```
+
+### Run the frontend
 
 ```bash
 cd client
-npm install
 npm run dev
 ```
+
+The application will be available at:
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+
+---
+
+## 🔐 Security
+
+- JWT authentication
+- HttpOnly cookies with Authorization header fallback
+- AES-256-CBC encryption for user API keys
+- Environment-based configuration
+
+## Author
+Akash Yadav
