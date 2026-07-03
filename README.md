@@ -10,15 +10,14 @@
 
 ## ✨ Features
 
-- 🤖 Chat with any GitHub repo(codebase) using RAG
-- 📄 AI-powered README generation
-- 🏗️ Interactive architecture visualization
-- 🔍 Code smell detection
-- 🔀 PRLens: Pull Request analysis
-- 💥 Blast Radius (PR Impact analysis)
-- 🔐 JWT authentication
-- 🔒 AES-256-CBC encrypted API key storage
-- 🐳 Dockerized backend deployment
+- 🤖 Repository Chat – Ask questions about any GitHub repository and receive context-aware answers using a RAG pipeline.
+- 🏗️ IArchitecture Visualization – Generates interactive architecture diagrams using Mermaid.js.
+- 🔍 Code Smell Detection – Identifies potential maintainability, performance, and security issues to improve code quality.
+- 🔀 PRLens – Simplifies Pull Request reviews with AI-generated summaries, change explanations, and review-focused insights.
+- 💥Blast Radius Analysis – Predicts the files, modules, and components that may be affected by a PR before merging.
+- 📄README Generator – Automatically generates structured and comprehensive README files based on the repository's codebase.
+- 🔐 Secure API Key Management – Encrypts user Gemini API keys using AES-256-CBC (Node.js Crypto) before storing them in the database.
+- 🐳 Containerized Deployment – Dockerized the backend and deployed it on Render, ensuring a consistent development and production environment.
 
 ---
 
