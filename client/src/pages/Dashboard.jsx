@@ -8,7 +8,7 @@ import useToast from "../hooks/useToast";
 const Dashboard = () => {
   const { repoUrl, resetSession, selectedModel} = useContext(AiSessionContext);
   const { user } = useAuth(); 
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
 
   const repoName = repoUrl ? repoUrl.split('/').pop().replace('.git', '') : 'No Repository';
@@ -87,7 +87,11 @@ const Dashboard = () => {
   ];
 
   const handleCardClick = (tool) => {
-    if (!repoUrl) {
+    if(!user){
+      showError("Login required")
+      navigate("/login");
+      return;
+    }if(!repoUrl) {
       navigate("/github-connect");
     } else {
       navigate(tool.goTo);

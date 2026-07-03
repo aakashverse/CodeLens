@@ -2,11 +2,13 @@ import { useState, useContext } from 'react';
 import { AiSessionContext } from '../context/ai-session.context';
 import { useAiSession } from '../hooks/useAi-session';
 import GithubConnectForm from '../components/GithubConnectForm';
+import { useAuth } from '../hooks/useAuth';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import codeLens from "../assets/codelens.svg";
 
 const AiSession = () => {
   const context = useContext(AiSessionContext);  
@@ -14,7 +16,8 @@ const AiSession = () => {
   const { handleConnect, handleSendMessage, isAiTyping, error } = useAiSession();
   
   const [chatInput, setChatInput] = useState('');
-  
+  const {user} = useAuth();
+
   if (!context) {
     return (
       <div className="p-6 text-red-400 font-mono text-sm">
@@ -70,9 +73,19 @@ const AiSession = () => {
                   <div key={idx} className={`flex gap-4 max-w-4xl mx-auto ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                     
                     {/* Avatar */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mt-1 ${msg.role === 'user' ? 'bg-gradient-to-tr from-purple-500 to-blue-500 text-white' : 'bg-blue-600 text-white'}`}>
-                      {msg.role === 'user' ? 'U' : 'AI'}
-                    </div>
+                    <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mt-1 ${
+                          msg.role === "user"
+                            ? "bg-gradient-to-tr from-purple-500 to-blue-500 text-white"
+                            : "bg-[#0E1117] text-white"
+                        }`}
+                      >
+                        {msg.role === "user" ? (
+                          user?.username?.charAt(0).toUpperCase()
+                        ) : (
+                          <img src={codeLens} alt="CodeLens" className="w-5 h-5 mt-4" />
+                        )}
+                      </div>
                     
                     <div className={`px-5 py-4 rounded-xl text-sm max-w-[85%] ${msg.role === 'user' ? 'bg-gray-800 border border-gray-700 text-gray-200 rounded-tr-sm' : 'text-gray-300 w-full'}`}>
                       
@@ -131,7 +144,7 @@ const AiSession = () => {
                 
                 {isAiTyping && (
                   <div className="flex gap-4 max-w-4xl mx-auto">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mt-1 bg-blue-600 text-white">AI</div>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mt-1 bg-[#0E1117] text-white"> <img src={codeLens} alt="CodeLens" className="w-5 h-5 mt-4" /></div>
                     <div className="px-5 py-4 text-gray-500 font-mono text-sm animate-pulse flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
                       &gt; Compiling repository references...

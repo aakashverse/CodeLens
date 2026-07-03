@@ -51,6 +51,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleSave = async (e) => {
+    if (!user) {
+      showError("Please log in to save your AI preferences.");
+      navigate("/login");
+      return;
+    }
+
     e.preventDefault();
 
     if (isEditingKey && !apiKey.trim()) {
@@ -163,18 +169,22 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </div>
 
             <div className="pt-2 border-t border-gray-800/80 mt-6">
-              <button 
-                type="submit" 
-                disabled={isSaving || (isEditingKey && !apiKey.trim())}
-                className="w-full mt-4 flex justify-center items-center bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors"
-              >
-                {isSaving ? (
-                  <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                ) : 'Save'}
-              </button>
+             <button
+                  type="submit"
+                  disabled={!user || isSaving || (isEditingKey && !apiKey.trim())}
+                  className="w-full mt-4 flex justify-center items-center bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors"
+                >
+                  {isSaving ? (
+                    <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : !user ? (
+                    "Login to Save"
+                  ) : (
+                    "Save"
+                  )}
+                </button>
             </div>
           </form>
         )}
