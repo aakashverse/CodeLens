@@ -78,7 +78,7 @@ async function initializeRepoSession(req, res){
         console.log(`[Atlas RAG] 4. Initializing Google Embeddings...`);
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "gemini-embedding-001", 
+            modelName: "embedding-001", 
             maxConcurrency: 1, 
             maxRetries: 2
         });
@@ -146,7 +146,7 @@ async function chatWithCodebase(req, res){
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "gemini-embedding-001",
+            modelName: "embedding-001",
         });
 
         
