@@ -78,7 +78,6 @@ export const useAiSession = () => {
     try {
       const data = await SendApiKey(apiKey, selectedModel);
       user.aiModel = selectedModel;
-      console.log('handleApiKey success: ', data);
       
       // close modal
       if(onClose) {

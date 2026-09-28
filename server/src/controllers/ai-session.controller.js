@@ -78,7 +78,7 @@ async function initializeRepoSession(req, res){
         console.log(`[Atlas RAG] 4. Initializing Google Embeddings...`);
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "embedding-001", 
+            modelName: "gemini-embedding-001", 
             maxConcurrency: 1, 
             maxRetries: 2
         });
@@ -146,7 +146,7 @@ async function chatWithCodebase(req, res){
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "embedding-001",
+            modelName: "gemini-embedding-001",
         });
 
         
@@ -175,30 +175,43 @@ async function chatWithCodebase(req, res){
         const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
         const vectorStore = await getVectorStore(embeddings);
 
-        const retriever = vectorStore.asRetriever({
-            k: 5, 
-            filter: {
-                preFilter: {
-                    "repoName": { $eq: repoName } 
-                }
-            }
-        });
+        // const retriever = vectorStore.asRetriever({
+        //     k: 5, 
+        //     filter: {
+        //         preFilter: {
+        //             repoName: { $eq: repoName } 
+        //         }
+        //     }
+        // });
 
-        const retrievedDocs = await retriever.invoke(String(question));
+        // const retrievedDocs = await retriever.invoke(String(question));
+        const retrievedDocs = await vectorStore.similaritySearch(
+            String(question),
+            5,
+            { repoName: { $eq: repoName } }
+        );
+
+        console.log("Retrieved:", retrievedDocs.length);
+
         const response = await combineDocsChain.invoke({
             input: String(question),
             context: retrievedDocs
         });
 
-        console.log(response);
 
         return res.status(200).json({ 
             answer: response 
         });
 
     } catch (error) {
-        console.error("[Atlas RAG Error] Inference generation failed:", error);
-        return res.status(500).json({ error: "AI failed to process code context query." });
+        console.error("[Atlas RAG Error]", error);
+        console.error("Message:", error?.message);
+        console.error("Stack:", error?.stack);
+        console.error("Response:", error?.response?.data);
+
+        return res.status(500).json({
+            error: error?.message || "AI failed to process code context query."
+        });
     }
 };
 

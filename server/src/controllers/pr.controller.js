@@ -92,23 +92,19 @@ async function analyzePR(req, res) {
         // connnect to vector store for the RAG Blast Radius Context
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            model: "gemini-embedding-001",
+            modelName: "gemini-embedding-001",
         });
 
         const vectorStore = await getVectorStore(embeddings);
         // const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
         
-        const retriever = vectorStore.asRetriever({
-            k: 3,
-            filter: {
-                preFilter:{ 
-                    "repoName": { $eq: repoName } 
-                }
-            }
-        });
         
         const query = changedFiles.join(" ");
-        const retrievedDocs = await retriever.invoke(String(query));
+        const retrievedDocs = await vectorStore.similaritySearch(
+            String(question),
+            5,
+            { repoName: { $eq: repoName } }
+        );
         const formattedContext = retrievedDocs.map(doc => doc.pageContent).join("\n\n");
 
         const response = await model.invoke(

@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     aiModel: {
         type: String,
-        default: 'gemini-2.5-flash'
+        default: "gemini-3.8-flash"
     }
 })
 

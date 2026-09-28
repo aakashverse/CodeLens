@@ -61,7 +61,7 @@ async function generateArchitecture(req, res) {
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            model: "gemini-embedding-001", 
+            modelName: "gemini-embedding-001", 
         });
 
         const vectorStore = await getVectorStore(embeddings);
@@ -72,17 +72,13 @@ async function generateArchitecture(req, res) {
 
         const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
         
-        const retriever = vectorStore.asRetriever({
-            k: 3, 
-            filter: {
-                preFilter: {
-                    "repoName": { $eq: repoName } 
-                }
-            }
-        });
 
         const query = "Analyze the provided context and extract the technologies into the exact JSON schema requested. Keep it factual and concise.";
-        const retrievedDocs = await retriever.invoke(String(query));
+        const retrievedDocs = await vectorStore.similaritySearch(
+            String(question),
+            5,
+            { repoName: { $eq: repoName } }
+        );
 
         const response = await combineDocsChain.invoke({
             input: String(query),

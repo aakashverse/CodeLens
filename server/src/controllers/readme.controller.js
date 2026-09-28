@@ -33,7 +33,7 @@ async function generateReadme(req, res) {
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            model: "gemini-embedding-001", 
+            modelName: "gemini-embedding-001", 
         });
 
         const prompt = PromptTemplate.fromTemplate(`
@@ -64,18 +64,14 @@ async function generateReadme(req, res) {
 
         const combineDocsChain = await createStuffDocumentsChain({llm: model, prompt}); 
         const vectorStore = await getVectorStore(embeddings);
-        
-        const retriever = vectorStore.asRetriever({
-            k: 3, 
-            filter: {
-                preFilter: {
-                    "repoName": { $eq: repoName } 
-                }
-            }
-        });
+
 
         const query = "Generate a proper README.md file, strictly follow the prompt & use the given context only."
-        const retrievedDocs = await retriever.invoke(String(query));
+        const retrievedDocs = await vectorStore.similaritySearch(
+            String(question),
+            5,
+            { repoName: { $eq: repoName } }
+        );
 
         const response = await combineDocsChain.invoke({
             input: String(query),

@@ -158,8 +158,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full bg-[#111827] border border-gray-700 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none appearance-none cursor-pointer transition-colors"
                 >
-                  {/* <option value="gemini-3.8-flash">gemini-3.8-flash </option> */}
-                  <option value="gemini-2.5-flash">gemini-2.5-flash (Recommended)</option>
+                  <option value="gemini-3.8-flash">gemini-3.8-flash (Recommended)</option>
+                  <option value="gemini-2.5-flash">gemini-2.5-flash </option>
                   <option value="gemini-1.5-pro">gemini-1.5-pro</option>
                   <option value="gemini-2.0-flash">gemini-2.0-flash (Preview)</option>
                 </select>

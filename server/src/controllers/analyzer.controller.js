@@ -81,18 +81,22 @@ async function AnalyzeCode(req, res) {
         }
 
         const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
-        const retriever = vectorStore.asRetriever({
-            k: 3, 
-            filter: {
-                preFilter: {
-                    repoName: { $eq: repoName }
-                }
-            }
-        })
+        // const retriever = vectorStore.asRetriever({
+        //     k: 3, 
+        //     filter: {
+        //         preFilter: {
+        //             repoName: { $eq: repoName }
+        //         }
+        //     }
+        // })
             
     
         const query = "Perform a deep scan of the codebase context. Look for redundant database queries, inefficient React state management, security vulnerabilities, and architectural anti-patterns. Return the exact JSON schema requested concisely.";
-        const retrievedDocs = await retriever.invoke(String(query));
+        const retrievedDocs = await vectorStore.similaritySearch(
+            String(question),
+            5,
+            { repoName: { $eq: repoName } }
+        );
 
         const response = await combineDocsChain.invoke({
             input: String(query),

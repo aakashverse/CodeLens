@@ -21,7 +21,10 @@ import api from "../utils/axios";
     
       return response.data;
     } catch(err){
-      console.log(err);
+      console.error("Chat API failed:");
+      console.error("Status:", err.response?.status);
+      console.error("Response:", err.response?.data);
+      console.error("Message:", err.message);
       throw err;
     }
   }
