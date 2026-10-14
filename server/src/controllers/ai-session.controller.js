@@ -78,7 +78,7 @@ async function initializeRepoSession(req, res){
         console.log(`[Atlas RAG] 4. Initializing Google Embeddings...`);
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "gemini-embedding-001", 
+            model: "text-embedding-004", 
             maxConcurrency: 1, 
             maxRetries: 2
         });
@@ -117,39 +117,155 @@ async function initializeRepoSession(req, res){
     }
 }
 
+// async function chatWithCodebase(req, res){
+//     const user = await User.findById(req.user.id);
 
-async function chatWithCodebase(req, res){
+//     if (!user.geminiApiKey) {
+//       return res.status(400).json({ error: "Please configure your API key in Settings." });
+//     }
+
+//     // console.log("without decrypt: ", user.geminiApiKey);
+//     const encryptedKey = decrypt(user.geminiApiKey);
+//     // console.log("with decrypt: ", rawApiKey);
+
+//     const { question, githubUrl } = req.body;
+
+//     if (!question || !githubUrl) {
+//         return res.status(400).json({ error: "Question or githubUrl are required." });
+//     }
+
+//     const repoName = githubUrl.split('/').pop().replace('.git', '');
+
+//     try {
+//         const model = new ChatGoogleGenerativeAI({
+//             apiKey: encryptedKey,
+//             model: user.aiModel,
+//             temperature: 0.2, 
+//         });
+
+//         const embeddings = new GoogleGenerativeAIEmbeddings({
+//             apiKey: encryptedKey,
+//             modelName: "text-embedding-004",
+//         });
+
+        
+//         const prompt = PromptTemplate.fromTemplate(`
+//             You are CodeLens AI, a sharp, concise software architect. 
+//             The developer is looking at their code on a split-screen UI right next to you. Treat this like a quick, helpful Slack chat.
+            
+//             CRITICAL BEHAVIORAL INSTRUCTIONS:
+//             1. **Be Direct & Extremely Concise**: Answer EXACTLY what the user asked and nothing more. Do not summarize the entire codebase unless explicitly requested. If the question is simple, give a 1-2 sentence answer.
+//             2. **Scale Your Detail**: ONLY use bullet points or deep explanations if the user uses words like "explain", "how does", or "break down". Otherwise, keep it brief.
+//             3. **No Code Dumping**: The user can already see the code! NEVER output blocks of code. Use inline backticks purely for variable/function names (e.g., \`initServer()\`).
+//             4. **Always Cite Files**: When mentioning where something happens, bold the file path so they can click/look at it (e.g., "That is handled in **\`src/routes.js\`**").
+//             5. **Focus on the "Why"**: Don't read syntax back to them. Just state the architectural purpose briefly.
+            
+//             STRICT CONSTRAINTS:
+//             - Base your answer ONLY on the provided context. Do not guess or hallucinate.
+//             - If the context does not contain the answer, simply say: "I don't see that in the currently indexed files."
+            
+//             Codebase Context:
+//             {context}
+            
+//             Developer Question: {input}
+//             System Answer:
+//         `);
+            
+//         // const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
+//         const vectorStore = await getVectorStore(embeddings);
+
+//         // const retriever = vectorStore.asRetriever({
+//         //     k: 5, 
+//         //     filter: {
+//         //         preFilter: {
+//         //             repoName: { $eq: repoName } 
+//         //         }
+//         //     }
+//         // });
+
+//         // const retrievedDocs = await retriever.invoke(String(question));
+//         const retrievedDocs = await vectorStore.similaritySearch(
+//             String(question),
+//             5,
+//             { preFilter: { repoName: { $eq: repoName } } }
+//         );
+
+//         console.log("Retrieved:", retrievedDocs.length);
+
+//         const response = await model.invoke({
+//             input: String(question),
+//             context: retrievedDocs
+//         });
+
+
+//         return res.status(200).json({ 
+//             answer: response 
+//         });
+
+//     } catch (error) {
+//         console.error("[Atlas RAG Error]", error);
+//         console.error("Message:", error?.message);
+//         console.error("Stack:", error?.stack);
+//         console.error("Response:", error?.response?.data);
+
+//         return res.status(500).json({
+//             error: error?.message || "AI failed to process code context query."
+//         });
+//     }
+// };
+
+async function chatWithCodebase(req, res) {
     const user = await User.findById(req.user.id);
 
     if (!user.geminiApiKey) {
-      return res.status(400).json({ error: "Please configure your API key in Settings." });
+        return res.status(400).json({ error: "Please configure your API key in Settings." });
     }
 
-    // console.log("without decrypt: ", user.geminiApiKey);
-    const encryptedKey = decrypt(user.geminiApiKey);
-    // console.log("with decrypt: ", rawApiKey);
-
+    const decryptedKey = decrypt(user.geminiApiKey);
     const { question, githubUrl } = req.body;
 
     if (!question || !githubUrl) {
-        return res.status(400).json({ error: "Question or githubUrl are required." });
+        return res.status(400).json({ error: "Question and githubUrl are required." });
     }
 
     const repoName = githubUrl.split('/').pop().replace('.git', '');
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            apiKey: encryptedKey,
+            apiKey: decryptedKey,
             model: user.aiModel,
-            temperature: 0.1, 
+            temperature: 0.2,
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: encryptedKey,
-            modelName: "gemini-embedding-001",
+            apiKey: decryptedKey,
+            model: "text-embedding-004",
         });
 
-        
+        const vectorStore = await getVectorStore(embeddings);
+
+        const retrievedDocs = await vectorStore.similaritySearch(
+            String(question),
+            5,
+            {
+                preFilter: {
+                    repoName: { $eq: repoName }
+                }
+            }
+        );
+
+        console.log(`[Atlas RAG] Retrieved ${retrievedDocs.length} chunks for repo: ${repoName}`);
+
+        // Fallback test: if 0 docs retrieved with filter, log a warning so you know it's an Index/Filter issue
+        if (retrievedDocs.length === 0) {
+            console.warn("[Atlas RAG] 0 chunks retrieved! Check your Atlas Vector Index 'filter' fields and document schema.");
+        }
+
+        // 2. Format documents to include both the file path (source) and the code content
+        const formattedContext = retrievedDocs
+            .map(doc => `File: ${doc.metadata?.source || 'unknown'}\n${doc.pageContent}`)
+            .join("\n\n---\n\n");
+
         const prompt = PromptTemplate.fromTemplate(`
             You are CodeLens AI, a sharp, concise software architect. 
             The developer is looking at their code on a split-screen UI right next to you. Treat this like a quick, helpful Slack chat.
@@ -171,49 +287,25 @@ async function chatWithCodebase(req, res){
             Developer Question: {input}
             System Answer:
         `);
-            
-        const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
-        const vectorStore = await getVectorStore(embeddings);
 
-        // const retriever = vectorStore.asRetriever({
-        //     k: 5, 
-        //     filter: {
-        //         preFilter: {
-        //             repoName: { $eq: repoName } 
-        //         }
-        //     }
-        // });
-
-        // const retrievedDocs = await retriever.invoke(String(question));
-        const retrievedDocs = await vectorStore.similaritySearch(
-            String(question),
-            5,
-            { repoName: { $eq: repoName } }
-        );
-
-        console.log("Retrieved:", retrievedDocs.length);
-
-        const response = await combineDocsChain.invoke({
+        // 3. Pipe the prompt to the model and invoke with the formatted context string
+        const chain = prompt.pipe(model);
+        const response = await chain.invoke({
             input: String(question),
-            context: retrievedDocs
+            context: formattedContext
         });
 
-
         return res.status(200).json({ 
-            answer: response 
+            answer: response.content // Extract the text string from AIMessage
         });
 
     } catch (error) {
         console.error("[Atlas RAG Error]", error);
-        console.error("Message:", error?.message);
-        console.error("Stack:", error?.stack);
-        console.error("Response:", error?.response?.data);
-
         return res.status(500).json({
             error: error?.message || "AI failed to process code context query."
         });
     }
-};
+}
 
 /**
  * Endpoint: GET /api/repo/check-status

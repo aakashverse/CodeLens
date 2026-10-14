@@ -71,7 +71,7 @@ async function AnalyzeCode(req, res) {
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            model: "gemini-embedding-001",
+            model: "text-embedding-004",
         });
 
         const vectorStore = await getVectorStore(embeddings);

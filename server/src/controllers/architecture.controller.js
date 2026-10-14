@@ -61,7 +61,7 @@ async function generateArchitecture(req, res) {
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "gemini-embedding-001", 
+            model: "text-embedding-004", 
         });
 
         const vectorStore = await getVectorStore(embeddings);

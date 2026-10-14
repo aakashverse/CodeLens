@@ -28,12 +28,12 @@ async function generateReadme(req, res) {
         const model = new ChatGoogleGenerativeAI({
             apiKey: encryptedKey,
             model: user.aiModel,
-            temperature: 0.1,
+            temperature: 0.2,
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "gemini-embedding-001", 
+            model: "text-embedding-004", 
         });
 
         const prompt = PromptTemplate.fromTemplate(`

@@ -6,8 +6,7 @@ async function ConnectToDB() {
             dbName: "codelens"
         });
 
-        console.log("MongoDB connected");
-        console.log("Database:", mongoose.connection.name);
+        console.log("MongoDB connected: ", mongoose.connection.name);
     } catch (err) {
         console.log("error in connecting db:", err);
     }

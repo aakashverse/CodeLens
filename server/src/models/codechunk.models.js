@@ -1,29 +1,34 @@
 const mongoose = require("mongoose");
 
 const CodeChunkSchema = new mongoose.Schema({
-    repoUrl: {
+    repoName: {
         type: String,
-        required: [true, 'repo url is required']
+        required: true,
+        index: true
     },
-    filePath: {
-        type: String,
-        required: [true, 'repo path is required']
-    },
-    fileName: {
+    source: {
         type: String,
         required: true
     },
-    content: {
+    text: {
         type: String,
-        required: [true, 'content is required']
+        required: true
     },
     embedding: {
         type: [Number],
-        required: [true, 'embeddings are required']
-    } 
-}, {timestamps: true}
-)
+        required: true
+    },
+    indexedAt: {
+        type: String
+    },
+    loc: {
+        lines: {
+            from: Number,
+            to: Number
+        }
+    }
+}, { 
+    collection: "code_embeddings" // Force Mongoose to use the exact same collection as LangChain
+});
 
-const CodeChunk = mongoose.model('CodeChunk', CodeChunkSchema);
-
-module.exports = CodeChunk
+module.exports = mongoose.model("CodeChunk", CodeChunkSchema);

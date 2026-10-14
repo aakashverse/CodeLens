@@ -86,13 +86,13 @@ async function analyzePR(req, res) {
         const model = new ChatGoogleGenerativeAI({
             apiKey: encryptedKey,
             model: user.aiModel,
-            temperature: 0.1,
+            temperature: 0.2,
         }).withStructuredOutput(PRAnalysisSchema);
 
         // connnect to vector store for the RAG Blast Radius Context
         const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: encryptedKey,
-            modelName: "gemini-embedding-001",
+            model: "text-embedding-004",
         });
 
         const vectorStore = await getVectorStore(embeddings);
