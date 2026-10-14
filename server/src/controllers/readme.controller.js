@@ -1,7 +1,4 @@
-const { MongoClient } = require("mongodb");
-const { MongoDBAtlasVectorSearch } = require("@langchain/mongodb");
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
-const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
 const { PromptTemplate } = require("@langchain/core/prompts");
 const User = require("../models/user.models");
 const { getVectorStore } = require("../utils/vectorStore");
@@ -11,10 +8,10 @@ const { decrypt } = require("../utils/encryption");
 async function generateReadme(req, res) {
     const user = await User.findById(req.user.id);
 
-    if (!user.geminiApiKey) {
-      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    if (!user || !user.geminiApiKey) {
+        return res.status(400).json({ error: "Please configure your API key in Settings." });
     }
-    
+
     const { githubUrl } = req.body;
 
     if (!githubUrl) {
@@ -22,18 +19,18 @@ async function generateReadme(req, res) {
     }
 
     const repoName = githubUrl.split('/').pop().replace('.git', '');
-    const encryptedKey = decrypt(user.geminiApiKey);
+    const decryptedKey = decrypt(user.geminiApiKey);
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            apiKey: encryptedKey,
-            model: user.aiModel,
+            apiKey: decryptedKey,
+            model: user.aiModel || "gemini-3.8-flash",
             temperature: 0.2,
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: encryptedKey,
-            model: "text-embedding-004", 
+            apiKey: decryptedKey,
+            model: "gemini-embedding-001",
         });
 
         const prompt = PromptTemplate.fromTemplate(`
@@ -62,29 +59,40 @@ async function generateReadme(req, res) {
             Return only the README in Markdown format.
         `);
 
-        const combineDocsChain = await createStuffDocumentsChain({llm: model, prompt}); 
         const vectorStore = await getVectorStore(embeddings);
 
+        if (!vectorStore) {
+            return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
+        }
 
-        const query = "Generate a proper README.md file, strictly follow the prompt & use the given context only."
+        const query = "Generate a proper README.md file, strictly follow the prompt & use the given context only.";
         const retrievedDocs = await vectorStore.similaritySearch(
-            String(question),
-            5,
-            { repoName: { $eq: repoName } }
+            query,
+            3,
+            {
+                preFilter: {
+                    repoName: { $eq: repoName }
+                }
+            }
         );
 
-        const response = await combineDocsChain.invoke({
+        const formattedContext = retrievedDocs.length > 0
+            ? retrievedDocs.map(doc => `File: ${doc.metadata?.source || 'unknown'}\n${doc.pageContent}`).join("\n\n---\n\n")
+            : "No indexed context available for this repository yet.";
+
+        const chain = prompt.pipe(model);
+        const response = await chain.invoke({
             input: String(query),
-            context: retrievedDocs
+            context: formattedContext
         });
 
         return res.status(200).json({
-            answer: response 
-        })
+            answer: response.content
+        });
 
     } catch (error) {
         console.error("Readme Generation Error: ", error);
-        return res.status(500).json({ error: "Failed to generate README." });
+        return res.status(500).json({ error: "Failed to generate README: " + (error.message || error) });
     }
 }
 

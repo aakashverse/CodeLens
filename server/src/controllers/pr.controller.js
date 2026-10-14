@@ -1,38 +1,37 @@
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
-const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
 const { PromptTemplate } = require("@langchain/core/prompts");
-const { getVectorStore } = require("../utils/vectorStore"); 
-const {z} = require("zod");
+const { getVectorStore } = require("../utils/vectorStore");
+const { z } = require("zod");
 const User = require("../models/user.models");
 const { decrypt } = require("../utils/encryption");
 
 async function analyzePR(req, res) {
     const user = await User.findById(req.user.id);
 
-    if (!user.geminiApiKey) {
-      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    if (!user || !user.geminiApiKey) {
+        return res.status(400).json({ error: "Please configure your API key in Settings." });
     }
-    
+
     const { prUrl } = req.body;
 
-    if(!prUrl) {
+    if (!prUrl) {
         return res.status(400).json({ error: "Pull Request URL is required." });
     }
 
     const match = prUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
-    if(!match) {
+    if (!match) {
         return res.status(400).json({ error: "Invalid GitHub PR URL. Format: https://github.com/owner/repo/pull/123" });
     }
 
     const [, owner, repo, prNumber] = match;
     const repoName = repo; // For mongoDB preFiltering
-
-    const encryptedKey = decrypt(user.geminiApiKey);
+    const decryptedKey = decrypt(user.geminiApiKey);
 
     try {
         const githubResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`, {
             headers: {
                 'Accept': 'application/vnd.github.v3.diff',
+                'User-Agent': 'CodeLens-App'
             }
         });
 
@@ -74,8 +73,8 @@ async function analyzePR(req, res) {
             Git Diff (The proposed changes):
             {diff}
         `);
-        
-        // pr analysis schema
+
+        // PR analysis schema
         const PRAnalysisSchema = z.object({
             tldr: z.string().describe("1-2 sentence high-level summary of the PR."),
             keyChanges: z.array(z.string()).describe("Array of 3-4 strings explaining functional changes."),
@@ -84,42 +83,47 @@ async function analyzePR(req, res) {
         });
 
         const model = new ChatGoogleGenerativeAI({
-            apiKey: encryptedKey,
-            model: user.aiModel,
+            apiKey: decryptedKey,
+            model: user.aiModel || "gemini-3.8-flash",
             temperature: 0.2,
         }).withStructuredOutput(PRAnalysisSchema);
 
-        // connnect to vector store for the RAG Blast Radius Context
+        // Connect to vector store for the RAG Blast Radius Context
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: encryptedKey,
-            model: "text-embedding-004",
+            apiKey: decryptedKey,
+            model: "gemini-embedding-001",
         });
 
         const vectorStore = await getVectorStore(embeddings);
-        // const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
-        
-        
-        const query = changedFiles.join(" ");
+
+        const query = changedFiles.length > 0 ? changedFiles.join(" ") : "Pull request review blast radius analysis";
         const retrievedDocs = await vectorStore.similaritySearch(
-            String(question),
-            5,
-            { repoName: { $eq: repoName } }
-        );
-        const formattedContext = retrievedDocs.map(doc => doc.pageContent).join("\n\n");
-
-        const response = await model.invoke(
-            await prompt.format({
-                changedFiles: changedFiles.join(", "),
-                context: formattedContext,
-                diff: diffText,
-            })
+            query,
+            3,
+            {
+                preFilter: {
+                    repoName: { $eq: repoName }
+                }
+            }
         );
 
-        console.log("PR Analysis: ", response);
+        const formattedContext = retrievedDocs.length > 0
+            ? retrievedDocs.map(doc => `File: ${doc.metadata?.source || 'unknown'}\n${doc.pageContent}`).join("\n\n---\n\n")
+            : "No indexed context available for this repository yet.";
+
+        const formattedPrompt = await prompt.format({
+            changedFiles: changedFiles.join(", "),
+            context: formattedContext,
+            diff: diffText,
+        });
+
+        const response = await model.invoke(formattedPrompt);
+
+        console.log("PR Analysis Complete: ", response);
 
         return res.status(200).json({
-            answer: response 
-        })
+            answer: response
+        });
 
     } catch (error) {
         console.error("PR Analysis Error:", error);

@@ -21,7 +21,7 @@ const Register = () => {
       showSuccess("Registration Successful");
       navigate("/");
     } catch (error) {
-      showError("Registration failed, try again");
+      showError(error?.response?.data?.message || error?.message || "Registration failed, try again");
     }
   };
 

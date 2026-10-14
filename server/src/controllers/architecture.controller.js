@@ -1,28 +1,25 @@
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
-const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
-const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
-const { getVectorStore } = require("../utils/vectorStore"); 
+const { getVectorStore } = require("../utils/vectorStore");
 const User = require("../models/user.models");
-
 const { decrypt } = require("../utils/encryption");
 
 async function generateArchitecture(req, res) {
     const user = await User.findById(req.user.id);
 
-    if (!user.geminiApiKey) {
-      return res.status(400).json({ error: "Please configure your API key in Settings." });
+    if (!user || !user.geminiApiKey) {
+        return res.status(400).json({ error: "Please configure your API key in Settings." });
     }
-    
+
     const { githubUrl } = req.body;
-    
-    if(!githubUrl){
+
+    if (!githubUrl) {
         return res.status(400).json({ error: "GitHub URL is required." });
     }
 
     const repoName = githubUrl.split('/').pop().replace('.git', '');
-    const encryptedKey = decrypt(user.geminiApiKey);
+    const decryptedKey = decrypt(user.geminiApiKey);
 
     const prompt = PromptTemplate.fromTemplate(`
         You are CodeLens AI, an elite software architect. 
@@ -51,17 +48,17 @@ async function generateArchitecture(req, res) {
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            apiKey: encryptedKey,
-            model: user.aiModel,
-            temperature: 0.1, 
+            apiKey: decryptedKey,
+            model: user.aiModel || "gemini-3.8-flash",
+            temperature: 0.1,
             modelKwargs: {
                 responseMimeType: "application/json",
             }
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: encryptedKey,
-            model: "text-embedding-004", 
+            apiKey: decryptedKey,
+            model: "gemini-embedding-001",
         });
 
         const vectorStore = await getVectorStore(embeddings);
@@ -70,27 +67,33 @@ async function generateArchitecture(req, res) {
             return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
         }
 
-        const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt });
-        
-
         const query = "Analyze the provided context and extract the technologies into the exact JSON schema requested. Keep it factual and concise.";
         const retrievedDocs = await vectorStore.similaritySearch(
-            String(question),
-            5,
-            { repoName: { $eq: repoName } }
+            query,
+            3,
+            {
+                preFilter: {
+                    repoName: { $eq: repoName }
+                }
+            }
         );
 
-        const response = await combineDocsChain.invoke({
+        const formattedContext = retrievedDocs.length > 0
+            ? retrievedDocs.map(doc => `File: ${doc.metadata?.source || 'unknown'}\n${doc.pageContent}`).join("\n\n---\n\n")
+            : "No indexed context available for this repository yet.";
+
+        const chain = prompt.pipe(model);
+        const response = await chain.invoke({
             input: String(query),
-            context: retrievedDocs
+            context: formattedContext
         });
 
         let parsedAnswer;
         try {
-            parsedAnswer = JSON.parse(response);
+            parsedAnswer = typeof response.content === "string" ? JSON.parse(response.content) : response.content;
             console.log("Architecture Extraction Complete: ", parsedAnswer);
         } catch(parseError) {
-            console.error("Failed to parse LLM response as JSON:", response);
+            console.error("Failed to parse LLM response as JSON:", response.content);
             return res.status(500).json({ error: "Failed to generate a valid architecture format." });
         }
 

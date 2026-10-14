@@ -19,7 +19,7 @@ const Login = () => {
       showSuccess("Login Successful");
       navigate('/');
     } catch (error) {
-      showError(error?.message || "Invalid credentials. Please try again.");
+      showError(error?.response?.data?.message || error?.message || "Invalid credentials. Please try again.");
     }
   };
 

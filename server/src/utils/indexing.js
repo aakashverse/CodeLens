@@ -1,13 +1,8 @@
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
+const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
+const { indexDocuments } = require("./vectorStore");
 
-const client = new MongoClient(process.env.MONGODB_URI);
-const dbName = "codelens";
-const collectionName = "code_embeddings";
-
-export async function indexCodebase(files, repoUrl) {
-    const collection = client.db(dbName).collection(collectionName);
-    
+async function indexCodebase(files, repoUrl, embeddings) {
+    const repoName = repoUrl.split('/').pop().replace('.git', '');
     const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1500,
         chunkOverlap: 200,
@@ -16,27 +11,30 @@ export async function indexCodebase(files, repoUrl) {
     const documents = [];
 
     for (const file of files) {
+        if (!file.content || !file.content.trim()) continue;
         const chunks = await splitter.splitText(file.content);
-        
+
         chunks.forEach((chunkText) => {
             documents.push({
                 pageContent: chunkText,
                 metadata: {
-                    repoUrl: repoUrl, 
-                    filePath: file.path,
-                    language: file.language
+                    repoName: repoName,
+                    source: file.path || file.filePath,
+                    language: file.language,
+                    indexedAt: new Date().toISOString()
                 }
-            }); 
-
+            });
         });
     }
 
-    await MongoDBAtlasVectorSearch.fromDocuments(documents, embeddings, {
-        collection: collection,
-        indexName: "vector_index",
-        textKey: "text",
-        embeddingKey: "embedding",
-    });
+    if (documents.length > 0) {
+        await indexDocuments(documents, embeddings);
+    }
 
     console.log(`Successfully indexed ${documents.length} chunks for ${repoUrl}`);
+    return documents.length;
 }
+
+module.exports = {
+    indexCodebase
+};

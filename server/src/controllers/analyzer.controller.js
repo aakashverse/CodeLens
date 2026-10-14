@@ -1,30 +1,26 @@
-const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
-const { MemoryVectorStore } = require("langchain/vectorstores/memory");
 const { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } = require("@langchain/google-genai");
-const { createStuffDocumentsChain } = require("langchain/chains/combine_documents");
-const { createRetrievalChain } = require("langchain/chains/retrieval");
 const { PromptTemplate } = require("@langchain/core/prompts");
 
-const {getVectorStore} = require("../utils/vectorStore"); 
+const { getVectorStore } = require("../utils/vectorStore");
 const User = require("../models/user.models");
 const { decrypt } = require("../utils/encryption");
 
 // analyzer function
 async function AnalyzeCode(req, res) {
     const user = await User.findById(req.user.id);
-    
-    if (!user.geminiApiKey) {
-      return res.status(400).json({ error: "Please configure your API key in Settings." });
+
+    if (!user || !user.geminiApiKey) {
+        return res.status(400).json({ error: "Please configure your API key in Settings." });
     }
 
     const { githubUrl } = req.body;
-    
+
     if (!githubUrl) {
         return res.status(400).json({ error: "GitHub URL is required." });
     }
-    
+
     const repoName = githubUrl.split('/').pop().replace('.git', '');
-    const encryptedKey = decrypt(user.geminiApiKey);
+    const decryptedKey = decrypt(user.geminiApiKey);
 
     const prompt = PromptTemplate.fromTemplate(`
         You are CodeLens AI, an elite static code analyzer and senior software architect. 
@@ -61,17 +57,17 @@ async function AnalyzeCode(req, res) {
 
     try {
         const model = new ChatGoogleGenerativeAI({
-            apiKey: encryptedKey,
-            model: user.aiModel,
-            temperature: 0.1, 
+            apiKey: decryptedKey,
+            model: user.aiModel || "gemini-3.8-flash",
+            temperature: 0.1,
             modelKwargs: {
                 responseMimeType: "application/json",
             }
         });
 
         const embeddings = new GoogleGenerativeAIEmbeddings({
-            apiKey: encryptedKey,
-            model: "text-embedding-004",
+            apiKey: decryptedKey,
+            model: "gemini-embedding-001",
         });
 
         const vectorStore = await getVectorStore(embeddings);
@@ -80,36 +76,34 @@ async function AnalyzeCode(req, res) {
             return res.status(400).json({ error: "No repository indexed. Please connect a repo first." });
         }
 
-        const combineDocsChain = await createStuffDocumentsChain({ llm: model, prompt }); 
-        // const retriever = vectorStore.asRetriever({
-        //     k: 3, 
-        //     filter: {
-        //         preFilter: {
-        //             repoName: { $eq: repoName }
-        //         }
-        //     }
-        // })
-            
-    
         const query = "Perform a deep scan of the codebase context. Look for redundant database queries, inefficient React state management, security vulnerabilities, and architectural anti-patterns. Return the exact JSON schema requested concisely.";
         const retrievedDocs = await vectorStore.similaritySearch(
-            String(question),
-            5,
-            { repoName: { $eq: repoName } }
+            query,
+            3,
+            {
+                preFilter: {
+                    repoName: { $eq: repoName }
+                }
+            }
         );
 
-        const response = await combineDocsChain.invoke({
+        const formattedContext = retrievedDocs.length > 0
+            ? retrievedDocs.map(doc => `File: ${doc.metadata?.source || 'unknown'}\n${doc.pageContent}`).join("\n\n---\n\n")
+            : "No indexed context available for this repository yet.";
+
+        const chain = prompt.pipe(model);
+        const response = await chain.invoke({
             input: String(query),
-            context: retrievedDocs
+            context: formattedContext
         });
 
         let parsedAnswer;
         try {
-            parsedAnswer = JSON.parse(response);
-            console.log("Architecture: ", parsedAnswer);
+            parsedAnswer = typeof response.content === "string" ? JSON.parse(response.content) : response.content;
+            console.log("Analyzer Output: ", parsedAnswer);
         } catch(parseError) {
-            console.error("Failed to parse LLM response as JSON:", response);
-            return res.status(500).json({ error: "Failed to generate a valid architecture format." });
+            console.error("Failed to parse LLM response as JSON:", response.content);
+            return res.status(500).json({ error: "Failed to generate a valid analysis format." });
         }
 
         return res.status(200).json({
@@ -121,7 +115,6 @@ async function AnalyzeCode(req, res) {
         return res.status(500).json({ error: "An internal server error occurred while analyzing the codebase." });
     }
 }
-
 
 module.exports = {
     AnalyzeCode
